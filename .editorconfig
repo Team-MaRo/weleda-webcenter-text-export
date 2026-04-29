@@ -25,11 +25,7 @@ trim_trailing_whitespace = false
 # Markdownlint to check instead
 indent_size = unset
 
-# Windows bash files
-[*.{cmd,bat}]
-end_of_line = crlf
-
-[{*.Dockerfile,Dockerfile,Vagrantfile}]
+[{*.svg,*.html,*.xml,*.webmanifest,*.scss,Vagrantfile}]
 indent_size = 4
 tab_width = 4
 ij_continuation_indent_size = 4
