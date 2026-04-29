@@ -18,7 +18,7 @@ updates:
       timezone: Europe/Zurich
 
   - package-ecosystem: npm
-    directory: /pwa
+    directory: /
     target-branch: develop
     labels:
       - "dependabot :robot:"
@@ -27,16 +27,17 @@ updates:
       time: '09:30'
       timezone: Europe/Zurich
     groups:
-      pwa-dependencies:
-        applies-to: version-updates
-        patterns:
-          - "*"
+      npm-minor-patch:
         update-types:
-          - "minor"
-          - "patch"
-      #pwa-dependencies:
-      #  applies-to: version-updates
-      #  patterns:
-      #    - "*"
-      #  update-types:
-      #    - "major"
+          - minor
+          - patch
+
+  - package-ecosystem: nix
+    directory: /
+    target-branch: develop
+    labels:
+      - "dependabot :robot:"
+    schedule:
+      interval: weekly
+      time: '09:30'
+      timezone: Europe/Zurich
