@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/3.0.0...3.0.1) (2026-05-16)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** Force transitive js-yaml ≥4.1.1 & gate CI on lockfile audit ([cbf4d6f](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/cbf4d6f941b171ec0dfb21c98d071b7ae7e60b95))
+
 ## [3.0.0](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/2.1.2...3.0.0) (2026-05-16)
 
 
