@@ -3,6 +3,12 @@ allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
 
+# Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
+# pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
+# ships a release on the patched version.
+overrides:
+  js-yaml: '>=4.1.1'
+
 # `@iwf-web/tsconfig/react-strict/tsconfig.json` extends three @tsconfig/*
 # bases. tsc follows the @iwf-web/tsconfig symlink and resolves them inside
 # the .pnpm subtree, but typescript-eslint's parser resolves against the
