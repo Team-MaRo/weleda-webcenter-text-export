@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "arcanis.vscode-zipfs",
-    "orta.vscode-jest",
-    "dbaeumer.vscode-eslint",
-    "bradlc.vscode-tailwindcss",
-    "editorconfig.editorconfig"
-  ]
-}
