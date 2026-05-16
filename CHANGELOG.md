@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/2.1.2...2.2.0) (2026-05-16)
+
+
+### ✨ Features
+
+* Rewrite as React Router v7 app, redesigned UI & Nix-built OCI image ([6b3ae0a](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/6b3ae0a796cbc53c5008bb14184eb7b85ec9be86))
+* Vagrant SSH provisioning, Centralize boilerplate files & Update dependencies ([fa0c306](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/fa0c30691f3b51c92e5319e95244d20d83dd02e4))
+
 ## [2.1.2](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/2.1.1...2.1.2) (2024-07-17)
 
 
