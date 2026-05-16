@@ -34,7 +34,7 @@
         let
           weleda-webcenter-text-export = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "weleda-webcenter-text-export";
-            version = "2.1.2"; # x-release-please-version
+            version = "2.2.0"; # x-release-please-version
             src = ./.;
 
             nativeBuildInputs = [
