@@ -65,7 +65,7 @@ This is the only non-trivial logic in the app. Behaviour is locked down by `conv
   2. **`keydown` fallback** (only when `document.activeElement` is `<body>`/`<html>`, where Chromium often *doesn't* fire a paste event). Uses `navigator.clipboard.readText()`, which prompts for permission once.
   The two paths coordinate via a `lastPasteHandledAt` timestamp so a single Ctrl+V can't double-toast (the keydown's `await readText()` continuation is async; the synchronous paste event runs in between and sets the timestamp). The hook also accepts an `onShortcutClipboardNotUsable` callback so the keydown path can toast "this isn't XML" — the standard path stays silent because the user might be pasting into the search box.
 - **`useToast()`** — single-slot toast with auto-hide.
-- **`useTheme()`** — dark/light → `body.light|.dark` + `localStorage['weleda-konverter:theme']`. The inline `themeBootstrap` IIFE in `root.tsx` runs before hydration so the first paint matches the persisted preference (no light/dark FOUC).
+- **`useTheme()`** — `useSyncExternalStore`-backed; reads `html.dark` class (set by the bootstrap script before first paint), writes localStorage `weleda-konverter:theme`. Module-level `subscribers` Set means every consumer re-renders on toggle. Exports `THEME_COLOR_LIGHT` / `THEME_COLOR_DARK` (oklch strings) reused by the JSX meta tags, the bootstrap IIFE, and `applyTheme`. See [Theme system](#theme-system) below.
 
 The `Result` component owns search/copy/download locally. Two patterns worth knowing:
 
@@ -80,6 +80,65 @@ The `Result` component owns search/copy/download locally. Two patterns worth kno
   ```
   Lifted straight from [react.dev/learn/you-might-not-need-an-effect](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes). Avoids the `react-hooks-extra/no-direct-set-state-in-use-effect` lint warning and one extra re-render.
 
+### Theme system
+
+The theme is controlled by `html.dark` / `html.light` class on `<html>` (not `<body>`). The cascade is split across three places:
+
+1. **`app/styles/_tokens.scss`** declares the runtime CSS variables on `:root` (light) and `html.dark` (dark), plus a **no-JS fallback** block: `@media (prefers-color-scheme: dark) { html:not(.light):not(.dark) { … } }`. Same dark token values as the `html.dark` block — applies only when neither class is set (no JS = bootstrap didn't run). Lets a no-JS user follow their OS preference and have it update reactively if they change it.
+2. **`app/styles/tailwind.css`** aliases each runtime var to Tailwind's `--color-*` token via `@theme` (`--color-bg: var(--bg)` etc.). The `var()` reference is preserved in the output, so utilities like `bg-bg`, `text-ink`, `border-line` re-resolve at use time as the cascade flips.
+3. **`app/root.tsx`** ships the `themeBootstrap` IIFE inside `<head>` **before `<Meta />` and `<Links />`**. The script:
+   - Reads `localStorage['weleda-konverter:theme']`, falls back to `prefers-color-scheme`
+   - Adds `html.light` or `html.dark` AND `html.js`
+   - Overrides every `<meta name="theme-color">`'s `content` to match the resolved palette (the JSX renders both light + dark metas with `media` queries; the bootstrap overwrites both so whichever the browser picks shows the right colour)
+
+The IIFE is intentionally minified to one line so it parses inline before stylesheets evaluate (avoids the theme FOUC). Two `eslint-disable-next-line` comments on it — keep them.
+
+`useTheme.ts` uses `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)`. `getSnapshot` reads `documentElement.classList.contains('dark')`. `applyTheme` writes localStorage, toggles classes on `documentElement`, rewrites every `meta[name="theme-color"]`, then notifies all subscribers. The shared subscriber Set means every consumer re-renders in lockstep when the theme flips.
+
+#### Theme toggle icons are CSS-driven, not React-rendered
+
+`ThemeToggle.tsx` keeps **both** the moon and the sun in the DOM at all times. Visibility is decided by the `dark:` Tailwind custom variant (`@custom-variant dark (&:where(html.dark, html.dark *))` in `tailwind.css`), which reads the same `html.dark` class the bootstrap set. The icons cross-fade + rotate-swap via `transition-[translate,rotate,opacity] duration-300 ease-soft`. React's `isDark` only drives `aria-label` / `title` / `aria-pressed`. Visual state is CSS; the correct icon shows from frame one regardless of SSR/client divergence — no hydration-flash.
+
+### Styling: Tailwind v4 utilities + scoped SCSS
+
+Visual rules are split across four files in `app/styles/`:
+
+- **`tailwind.css`** — `@import "tailwindcss"` + `@theme` block (color aliases to runtime vars, plus `--radius-card: 14px`, `--radius-pill: 10px`, `--shadow-card-sm/md: var(--shadow-sm/md)`, `--ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1)`, `--text-display: 2.375rem` with paired `line-height`/`letter-spacing`, `--container-prose-narrow: 56ch`). Plus three customs: `@custom-variant dark`, `@custom-variant no-js`, and `@utility container { … }` (stepped caps 39/47/61.25 rem to top out at 980 px on lg+, mirroring the project's brand cap).
+- **`_tokens.scss`** — `:root` + `html.dark` + the no-JS-dark `@media` block. All runtime CSS vars live here.
+- **`_base.scss`** — element resets (`*`, `html`, `body`) and accessibility media queries (`@media (prefers-reduced-motion)` blanket transition kill, `@media (prefers-reduced-transparency)` opacity overrides + `backdrop-filter: none`).
+- **`_components.scss`** — what couldn't be expressed as utilities. Currently `.no-js-submit` + `.no-js-selected-hint` + the two `:has()` Dropzone form rules, `.file-stats span::before` separator counter, `.output` prose typography (`p` + `mark`), one `@media (max-width: 640px) { .output { … } }` responsive override. Everything else is Tailwind utilities directly on the JSX.
+- **`main.scss`** is just `@use 'tokens'; @use 'base'; @use 'components';`.
+
+Component-level patterns:
+
+- **Use Tailwind utilities first.** Map to named scale (`text-xs`, `rounded-md`, `size-8`) — don't reach for `[Npx]` arbitrary values. For project-specific values that don't snap, add a `@theme` token (e.g. `--text-display`).
+- **`classnames` lib for conditional class strings.** When composing variants/states inside a component, use `classNames(...)` from `classnames` rather than `.filter(Boolean).join(' ')`. Inline the strings in the `className` arg list — only extract to module-level consts (`const VARIANTS: Record<...>`) when there's a real lookup table.
+- **State machines via React props + ternary, no `.is-*` strings.** `Toast`, `DragOverlay`, `Result` article, `Button` (copied) compose visible/hidden/variant classes in the component body. Avoids React-toggled `.is-active` selectors that would otherwise live in SCSS.
+- **`<Button>` component** absorbs the previous `.btn` family. Props: `variant: 'default' | 'primary' | 'icon'`, optional `copied?: boolean`. Use it everywhere a button is needed (Result Copy/Download/Close, Dropzone no-JS submit). Don't recreate the same utility chains by hand.
+- **`<FallbackPage title message>`** renders the 404 / ErrorBoundary body. Used by `routes/not-found.tsx` and the `ErrorBoundary` in `root.tsx`.
+- **`group` + `group-hover:`** for parent-hover-affects-child. See `Dropzone.tsx` — the label has `group`, the icon-wrap has `group-hover:bg-paper-hover group-hover:text-accent-d`.
+
+#### Header: sticky + blurred translucent
+
+`Topbar.tsx`'s outer `<header>` has `sticky top-0 z-30 bg-header backdrop-blur-md border-b border-line-soft`. The inner content is wrapped in `<div className="container …">` so brand row and main content share the same left edge across breakpoints. `--header-bg` is a translucent token (light `oklch(... / 0.7)`, dark `... / 0.75`). `bg-header` is the `@theme` alias. Under `prefers-reduced-transparency: reduce`, `_base.scss` flips `--header-bg` to a fully opaque variant (and the same `backdrop-filter: none !important` blanket removes the blur). `z-30` sits below the `.drag-overlay` (`z-index: 100`) and `.toast` (`z-index: 200`) in `_components.scss`.
+
+#### Accessibility: prefers-reduced-motion + prefers-reduced-transparency
+
+Both handled centrally in `_base.scss`:
+
+- **`@media (prefers-reduced-motion: reduce)`** — site-wide blanket rule that snaps every transition + animation to `0.01ms !important` (kept above zero so `transitionend` listeners still fire). Catches every Tailwind utility transition + SCSS rule.
+- **`@media (prefers-reduced-transparency: reduce)`** — flips `--accent-glow` to `transparent`, flips `--header-bg` to its opaque counterpart for `:root` AND `html.dark` AND the no-JS-dark selector (specificity 0,2,1 — needs the nested `@media (prefers-color-scheme: dark) { html:not(.light):not(.dark) { … } }` to win over the no-JS-dark translucent rule), and applies `backdrop-filter: none !important` to every element so the header's `backdrop-blur-md` drops cleanly.
+
+#### Theme flip: most elements snap, small interactive elements cross-fade
+
+There is **no** global `body, body *` transition rule. On theme toggle, the body bg + page text + icons + headers snap instantly to the new palette — no in-between interpolated frame, so no AA-recomputation flicker on text or `currentColor` icons. Only elements that carry their own `transition-*` utility (Button, ThemeToggle button, Dropzone label + icon-wrap) cross-fade during the flip. State-machine animations (drag overlay, toast, result panel reveal, theme toggle icon swap) animate their own opacity/transform unchanged. `--header-bg` and `backdrop-filter` also snap on the `prefers-reduced-transparency` toggle (filter functions can't interpolate to/from `none` anyway).
+
+If you ever feel like adding back a `body, body * { transition: … }` rule, expect text/icon flicker during theme flip — Chromium's text repaint on interpolated `color` values goes through subpixel-AA recalc that's visible for a frame or two. Per-element transitions are the safe pattern.
+
+### `no-js:` Tailwind variant — hide JS-only UI
+
+`@custom-variant no-js (&:where(html:not(.js), html:not(.js) *))` is defined in `tailwind.css`. Use `no-js:hidden` on anything that has no useful no-JS behaviour. Currently applied to: ThemeToggle button, Result actions row (Copy / Download / Close), Result search bar. The bootstrap script adds `.js` to `<html>` before first paint, so JS users see the elements normally; no-JS users (Mensa scrapers, JS-disabled, script blocked) see only the working subset.
+
 ### No-JS fallback
 
 Reachable only from the SSR build. The `Dropzone` component renders a real `<form method="post" action="?index" encType="multipart/form-data">` wrapping the existing label + hidden file input (the hidden input gets `name="file"` and `required`). The submit button + "file selected" hint live inside `<noscript>`, so:
@@ -92,26 +151,15 @@ Two non-obvious requirements:
 1. **`action="?index"` is mandatory.** React Router treats `POST /` as ambiguous between the root layout and the index route, returning 405. The `?index` query disambiguates to the index action. Without it, you get a `405 Method Not Allowed` rendered through the root `ErrorBoundary`.
 2. **`required` on the file input is structural, not just validation.** Stripping it would break the `:has(input:valid)` CSS feedback because file inputs are unconditionally `:valid` without `required`.
 
-Search, copy, and download are JS-only by nature (search reruns the highlight memo, copy uses the Clipboard API, download uses Blob URLs). Without JS they render but do nothing — the user reads / select-copies the text manually. Don't try to polyfill them.
+Search, copy, and download are JS-only by nature (search reruns the highlight memo, copy uses the Clipboard API, download uses Blob URLs). Their containers carry `no-js:hidden` so they don't render at all without JS — the user reads / select-copies the text manually. Don't try to polyfill them.
 
 ### i18n is mandatory for all UI strings
 
 Every user-facing string lives in `app/locales/de.yml`. Components import `useTranslation` from `react-i18next` and call `t('key')`. The `meta()` export in `routes/home.tsx` calls `i18n.t(...)` directly because it runs outside React. To add a string: add a key to `de.yml`, reference it via `t('…')` — never inline German in TSX.
 
+**HMR for translations.** `app/i18n.ts` has `if (import.meta.hot) { import.meta.hot.accept('./locales/de.yml', …) }` that re-bundles the resource and calls `i18n.changeLanguage(i18n.language)` to re-render. Without this, the `!i18n.isInitialized` guard would skip re-init on YAML edit and Dev would show stale strings.
+
 Action-side error codes use the same keys as toasts: `not-xml` → `toast.not_xml`, `no-content` → `toast.no_content`, `no-file` → `toast.no_file`. The mapping is a runtime if-chain in `home.tsx` (not a `Record`) so TS can narrow string literal returns — see the note under State and event flow about `useActionData` widening.
-
-### Styling
-
-All visual rules live in `app/styles/main.scss`. The design tokens are oklch CSS variables on `:root`. Tailwind v4 is wired via `@tailwindcss/vite` (utility classes are fine). **No inline `style={…}` on JSX** — give the element a class and add the rule to `main.scss` instead. The 404 / error fallbacks use `.fallback-page` for this reason.
-
-The no-JS feedback states rely on the **`:has()` selector**:
-
-```scss
-.dropzone-form:has(input[type='file']:valid) .no-js-selected-hint { display: block; }
-.dropzone-form:not(:has(input[type='file']:valid)) .no-js-submit button { opacity: 0.55; }
-```
-
-Both rules target elements that only live inside `<noscript>` in JS mode (so they have no effect for JS users — the `:has()` parent on `.dropzone-form` still matches, but the children aren't in the live DOM). Browser support is Chrome/Edge 105+, Safari 15.4+, Firefox 121+.
 
 ### Icons (extracted SVGs)
 
@@ -120,7 +168,7 @@ Per-icon files in `app/assets/icons/*.svg`, imported as React components via the
 ```tsx
 import CheckIcon from '~/assets/icons/check.svg?react';
 // …
-<CheckIcon width={14} height={14} className="check" />
+<CheckIcon width={14} height={14} />
 ```
 
 - Default stroke width is `1.8`; override per call site with `<UploadIcon strokeWidth={1.6} />` when needed.
@@ -129,13 +177,29 @@ import CheckIcon from '~/assets/icons/check.svg?react';
 - The svgr plugin in `vite.config.ts` rewrites `#575756` → `currentColor` so the same source SVG renders fixed-grey as a favicon (`?url` import) and re-themes when used inline.
 - Ambient type declarations for `*.svg?react` and `*.svg?url` are in `app/globals.d.ts`.
 
+### Build-emitted favicons + PWA manifest
+
+`public/` does not exist in the repo. All static artefacts are emitted by Vite plugins under `app/vite/plugins/`:
+
+- **`favicon-rasters.ts`** — runs in the client build only. Reads `app/assets/favicon.svg`, walks its inline `<style>` block and inlines class-based `fill`/`stroke` rules as element attributes (libvips doesn't resolve external CSS rules during SVG rasterisation). Renders PNG fallbacks via `sharp` (density 384 for 16–512 px), bakes a multi-resolution `favicon.ico` via `png-to-ico` (16/32/48 BMP-encoded). Output icon list is shared with `web-manifest.ts` via `app/config/web-manifest.ts`. Emits `favicon.svg`, `favicon-96x96.png`, `apple-touch-icon.png`, `web-app-manifest-{192,512}x*.png`, `favicon.ico` to `build/client/`.
+- **`web-manifest.ts`** — reads `app/locales/de.yml`, pulls `brand.name` for the manifest's `name` field. Combines with `app/config/web-manifest.ts`'s `WEB_MANIFEST` (description, theme/bg colors, display mode) and the shared `WEB_MANIFEST_ICONS` list. Emits `site.webmanifest` to `build/client/`. A single edit in `de.yml` propagates to the installed-PWA title.
+- **`spa-fallback.ts`** — copies `build/client/index.html` to `build/client/404.html` so GitHub Pages serves the SPA shell on any deep URL. SSR builds emit no `index.html` in this dir, so the `existsSync` guard makes it a no-op there.
+- **`copyright-from-license.ts`** — pulls year(s) + holder from `LICENSE.txt`, exposes them as `__COPYRIGHT_YEARS__` / `__COPYRIGHT_HOLDER__` build-time globals consumed by `AppFooter.tsx`.
+- **`strip-spa-server-exports.ts`** — strips the `action` export from `routes/home.tsx` in the SPA build (React Router 7's Vite plugin rejects an `action` export in SPA-mode route modules, but the SSR build needs it for the no-JS form POST).
+
+The footer also carries a `footer.weleda_credit` line crediting Weleda AG for the logo + brand name.
+
+### `SITE_HOST` for sitemap + robots + CNAME
+
+`vite.config.ts` reads `process.env.SITE_HOST?.trim()` (falls back to `localhost`). `deploy-gh-pages.yml` and `docker.yml` both fetch the custom domain via `gh api repos/<repo>/pages --jq '.cname'` and pass it in as `SITE_HOST` so `vite-plugin-sitemap` and `vite-plugin-robots-ts` get the right hostname. The deploy workflow also writes `build/client/CNAME` from the same value (GH Pages requires the file served at `/CNAME`); there is no committed `public/CNAME` to drift.
+
 ### Path alias
 
 `~` resolves to `app/` (in both `tsconfig.json` paths and `vite.config.ts` resolve.alias). Use `~/components/Foo` rather than `../../components/Foo`.
 
 ### YAML imports
 
-`app/locales/*.yml` are loaded as ES modules through `@modyfi/vite-plugin-yaml`. The ambient `*.yml` declaration lives in `app/globals.d.ts`.
+`app/locales/*.yml` are loaded as ES modules through `@modyfi/vite-plugin-yaml` at runtime. The `web-manifest.ts` Vite plugin reads YAML at build time via the `yaml` npm package (since `@modyfi/vite-plugin-yaml` only exposes a runtime loader). The ambient `*.yml` declaration lives in `app/globals.d.ts`.
 
 ## Production image (Nix-built OCI)
 
@@ -156,9 +220,9 @@ import CheckIcon from '~/assets/icons/check.svg?react';
 ## Workflows
 
 - **`ci.yml`** — lint + typecheck + build + tests on every PR / push, plus a Trivy / Grype scan of the OCI image.
-- **`deploy-gh-pages.yml`** — `SSR=false pnpm build` → `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`.
-- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. Same `setup → build → manifest → attest` pipeline as `d3strukt0r/d3strukt0r.github.io`: build matrix has no Docker Hub creds, manifest job uses a `registry:3` service container + `skopeo` + `imagetools create`, cosign + attest per arch + per manifest-list tag. `paths-ignore: [pnpm-lock.yaml, package.json]` skips lockfile-only Dependabot merges (the follow-up bump commit re-fires the workflow).
-- **`bump-pnpm-hash.yml`** — push-triggered on `master`/`develop` when `pnpm-lock.yaml`/`package.json` changes. Runs `bin/bump-pnpm-hash.sh`: swaps `pnpmDeps.hash` with `lib.fakeHash`, runs `nix build` to provoke the FOD mismatch, extracts the real value from the `got:` line, writes it back, commits + pushes under `github-actions[bot]`. **Requires `GH_PAT`** — plain `GITHUB_TOKEN` commits don't trigger downstream workflows (docker.yml would stay queued).
+- **`deploy-gh-pages.yml`** — fetches `SITE_HOST` from the GH Pages REST API, runs `SSR=false pnpm build` with that env, writes the value to `build/client/CNAME`, then `actions/upload-pages-artifact@v5` → `actions/deploy-pages@v5` on push to `master`.
+- **`docker.yml`** — multi-arch (`amd64`, `arm64`, `riscv64`) Nix-built OCI image to Docker Hub. `setup` job pulls `SITE_HOST` from the GH Pages REST API and fans it out via `needs.setup.outputs.site_host` so every arch sees the same hostname. Same `setup → build → manifest → attest` pipeline as `d3strukt0r/d3strukt0r.github.io`: build matrix has no Docker Hub creds, manifest job uses a `registry:3` service container + `skopeo` + `imagetools create`, cosign + attest per arch + per manifest-list tag. `paths-ignore: [pnpm-lock.yaml, package.json]` skips lockfile-only Dependabot merges (the follow-up bump commit re-fires the workflow).
+- **`bump-pnpm-hash.yml`** — push-triggered on `master`/`develop` when `pnpm-lock.yaml`/`package.json` changes. Runs `.github/scripts/bump-pnpm-hash.sh`: swaps `pnpmDeps.hash` with `lib.fakeHash`, runs `nix build` to provoke the FOD mismatch, extracts the real value from the `got:` line, writes it back, commits + pushes under `github-actions[bot]`. **Requires `GH_PAT`** — plain `GITHUB_TOKEN` commits don't trigger downstream workflows (docker.yml would stay queued).
 - **`release.yml`** — `googleapis/release-please-action@v5` on push to `master`. Scans conventional commits, opens a release PR with version bump + `CHANGELOG.md`; on merge cuts a GitHub Release + git tag. The tag triggers `docker.yml`. Managed files: `package.json` (`version`) + `flake.nix` (`version = "X.Y.Z"; # x-release-please-version`). Uses `GH_PAT`.
 - `dependabot-validate.yml` / `dependabot-automerge.yml` / `dockerhub-description.yml` / `greetings.yml` / `label.yml` / `stale.yml` — peripheral automation.
 
@@ -172,9 +236,14 @@ import CheckIcon from '~/assets/icons/check.svg?react';
 - **`useActionData<typeof action>()` widens literal unions.** Narrow with explicit if-chains, not `Record<'no-file'|'not-xml'|'no-content', string>` lookups — TS reports `Argument of type 'string | undefined' is not assignable to parameter of type 'string'` on the index.
 - **Don't put a `<button type=submit>` inside the dropzone `<label>`.** Clicking the button would also trigger the label's file picker. Submit lives as a sibling inside the wrapping `<form>`, gated by `<noscript>`.
 - **`<noscript>` contents are text-only in JS mode.** When testing the no-JS path in JS-enabled browsers, you have to re-inject the noscript innerHTML as live elements (see how we verify CSS state in the Chrome DevTools MCP path). Don't expect `document.querySelector('form.no-js-form')` to find anything.
-- **`pnpmDeps.hash`** — every `pnpm-lock.yaml` change needs a paired hash bump in `flake.nix`. `bump-pnpm-hash.yml` handles it on `master`/`develop`. For local manual `pnpm add`/`update`, run `./bin/bump-pnpm-hash.sh`.
+- **`pnpmDeps.hash`** — every `pnpm-lock.yaml` change needs a paired hash bump in `flake.nix`. `bump-pnpm-hash.yml` handles it on `master`/`develop`. For local manual `pnpm add`/`update`, run `./.github/scripts/bump-pnpm-hash.sh`.
 - **pnpm via Corepack** (host/devcontainer/CI only). `packageManager` field in `package.json` pins the version. `corepack enable` once on dev machines; don't `npm i -g pnpm`. Production image bypasses Corepack — uses `pkgs.pnpm_10` at build time, ships zero pnpm at runtime.
-- **The `themeBootstrap` IIFE in `root.tsx`** is intentionally minified to a single line so it parses inline before hydration (avoids the theme FOUC). Two `eslint-disable-next-line` comments on the same const + the `<script dangerouslySetInnerHTML>` — both have a `--` rationale; keep them when editing.
+- **The `themeBootstrap` IIFE in `root.tsx`** is intentionally minified to a single line so it parses inline before hydration (avoids the theme FOUC). It MUST stay in `<head>` and run **before `<Meta />` + `<Links />`** so the `html.dark` / `html.light` / `html.js` classes are on `<html>` before any stylesheet evaluates. Two `eslint-disable-next-line` comments on the same const + the `<script dangerouslySetInnerHTML>` — both have a `--` rationale; keep them when editing.
+- **`useSyncExternalStore` for `useTheme`.** `getServerSnapshot` returns `'light'`; the first client render also uses the server snapshot for hydration consistency. Don't refactor it back to `useState` + `useEffect` — every consumer would lose the shared-state guarantee (see the `subscribers` Set).
+- **CSS `bg-bg` / `text-ink` / etc. cascade through the Tailwind `@theme` alias.** `--color-bg: var(--bg)` is preserved as a `var()` reference in the compiled CSS; the inner `var(--bg)` resolves at the consuming element, so `html.dark` / `prefers-color-scheme: dark` overrides cascade through. Don't replace the alias with hardcoded `oklch()` values in `@theme`.
 - **`react-hooks-extra/no-direct-set-state-in-use-effect`** trips on the canonical SSR-hydration mounted marker (`useEffect(() => setMounted(true), [])`). The suppression on `ThemeToggle.tsx` is intentional; don't rewrite it.
 - **`ts/promise-function-async` on `wrapSegment`** — React 19's `ReactNode` includes `Promise<ReactNode>`, which trips the rule on synchronous renderers. Suppression has a `--` rationale; adding `async` would wrap each node in a Promise React can't render.
 - **`release.yml`-managed lines** — the `version = "X.Y.Z"; # x-release-please-version` line in `flake.nix` is bot-managed. Hand-edits get overwritten on the next release PR.
+- **Don't reach for `[Npx]` arbitrary Tailwind values.** Snap to the named scale (`text-xs`, `rounded-md`, `size-8`) when close enough; for project-specific values that don't fit, add a `@theme` token (e.g. `--text-display`, `--container-prose-narrow`). Arbitrary values are reserved for genuine one-offs where no named scale comes close (e.g. `translate-y-[120%]` on the theme-icon swap).
+- **No global theme cross-fade rule.** Theme flip snaps text + bg + icons instantly; only specific elements with their own `transition-*` utility (Button, ThemeToggle, Dropzone) cross-fade. Don't add a `body, body * { transition: … }` rule back — text/icon color interpolation produces a brief AA-recomputation flicker that the snap avoids.
+- **Reduced-transparency cascade has a no-JS-dark gap.** The `_base.scss` reduced-transparency block contains a nested `@media (prefers-color-scheme: dark) { html:not(.light):not(.dark) { --header-bg: opaque-dark } }`. Without it, the no-JS dark fallback rule (specificity 0,2,1) outranks the literal `:root` opaque override (0,1,0) and the header bleeds through under reduced-transparency + JS-disabled + OS-dark. Don't remove that nested rule.
