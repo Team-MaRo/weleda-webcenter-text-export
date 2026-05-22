@@ -20,3 +20,50 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+// Honor OS / app accessibility preferences. Single blanket rule catches every
+// transition + animation across the app without per-component @media guards.
+// `0.01ms` (not `0s`) keeps `transitionend` / `animationend` listeners firing.
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Reduced transparency: solid the accent glow + sticky header bg, and drop
+// all backdrop blur (drag overlay + header). Tokens that carry an alpha
+// channel (`--accent-glow`, `--header-bg`) get flipped to fully opaque
+// counterparts so nothing shows page content bleeding through underneath
+// once the blur is disabled.
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  html.dark {
+    --accent-glow: transparent;
+  }
+  :root      { --header-bg: oklch(98.5% 1.25% 90deg); }
+  html.dark  { --header-bg: oklch(18% 3% 200deg); }
+
+  // No-JS + OS dark: matches the no-JS dark fallback selector in
+  // _tokens.scss (specificity 0,2,1) — without this rule, that
+  // translucent declaration outranks the :root opaque override above
+  // and the header bleeds through even under reduced-transparency.
+  // Source order wins at equal specificity, so this flips it to opaque.
+  @media (prefers-color-scheme: dark) {
+    html:not(.light):not(.dark) {
+      --header-bg: oklch(18% 3% 200deg);
+    }
+  }
+
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
