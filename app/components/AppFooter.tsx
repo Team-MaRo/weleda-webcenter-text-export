@@ -10,6 +10,9 @@ export function AppFooter() {
       <div className="mt-1 opacity-75">
         {t('footer.copyright', {years: __COPYRIGHT_YEARS__, holder: __COPYRIGHT_HOLDER__})}
       </div>
+      <div className="mt-1 opacity-75">
+        {t('footer.weleda_credit')}
+      </div>
     </footer>
   );
 }

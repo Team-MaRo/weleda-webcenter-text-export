@@ -79,6 +79,7 @@ footer:
   separator: '·'
   text: 'Web Center XML zu Text Konverter'
   copyright: '© {{years}} {{holder}}'
+  weleda_credit: 'Logo und Markenname „Weleda" sind Eigentum der Weleda AG.'
 
 errors:
   generic_title: 'Etwas ist schiefgelaufen'
