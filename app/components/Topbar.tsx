@@ -6,7 +6,7 @@ import {ThemeToggle} from './ThemeToggle';
 export function Topbar() {
   const {t} = useTranslation();
   return (
-    <header className="border-b border-line-soft">
+    <header className="sticky top-0 z-30 bg-header backdrop-blur-md border-b border-line-soft">
       <div className="container flex items-center justify-between py-5 px-8 max-md:px-5">
         <div className="flex items-center gap-3.5">
           <WeledaMark className="w-8 h-8 block text-ink" aria-hidden="true" />

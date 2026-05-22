@@ -6,6 +6,7 @@
   --bg-soft:      oklch(96.5% 2% 90deg);
   --paper:        oklch(99.5% 0.75% 90deg);
   --paper-hover:  oklch(100% 0% 0deg);
+  --header-bg:    oklch(98.5% 1.25% 90deg / 0.7);
   --ink:          oklch(22% 2.5% 180deg);
   --ink-soft:     oklch(42% 2.5% 180deg);
   --ink-mute:     oklch(62% 2% 180deg);
@@ -30,6 +31,7 @@ html.dark {
   --bg-soft:      oklch(22% 3% 200deg);
   --paper:        oklch(24% 3.25% 200deg);
   --paper-hover:  oklch(28% 3.5% 200deg);
+  --header-bg:    oklch(18% 3% 200deg / 0.75);
   --ink:          oklch(96% 1.25% 90deg);
   --ink-soft:     oklch(78% 2% 90deg);
   --ink-mute:     oklch(60% 2.5% 90deg);
@@ -59,6 +61,7 @@ html.dark {
     --bg-soft:      oklch(22% 3% 200deg);
     --paper:        oklch(24% 3.25% 200deg);
     --paper-hover:  oklch(28% 3.5% 200deg);
+    --header-bg:    oklch(18% 3% 200deg / 0.75);
     --ink:          oklch(96% 1.25% 90deg);
     --ink-soft:     oklch(78% 2% 90deg);
     --ink-mute:     oklch(60% 2.5% 90deg);
