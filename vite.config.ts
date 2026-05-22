@@ -10,7 +10,7 @@ import sitemap from 'vite-plugin-sitemap';
 import svgr from 'vite-plugin-svgr';
 import {defineConfig} from 'vitest/config';
 import {copyrightFromLicense} from './app/vite/plugins/copyright-from-license';
-import {staticArtifacts} from './app/vite/plugins/static-artifacts';
+import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {stripSpaServerExports} from './app/vite/plugins/strip-spa-server-exports';
 
 const isVitest = process.env.VITEST === 'true';
@@ -67,7 +67,7 @@ export default defineConfig({
       content: `${ALLOW_ALL}\n`,
       sitemap: `${SITE_URL}/sitemap.xml`,
     })),
-    staticArtifacts({outDir: absOutDir}),
+    spaFallback({outDir: absOutDir}),
   ],
   resolve: {
     tsconfigPaths: true,
