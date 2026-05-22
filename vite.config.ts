@@ -10,8 +10,10 @@ import sitemap from 'vite-plugin-sitemap';
 import svgr from 'vite-plugin-svgr';
 import {defineConfig} from 'vitest/config';
 import {copyrightFromLicense} from './app/vite/plugins/copyright-from-license';
+import {faviconRasters} from './app/vite/plugins/favicon-rasters';
 import {spaFallback} from './app/vite/plugins/spa-fallback';
 import {stripSpaServerExports} from './app/vite/plugins/strip-spa-server-exports';
+import {webManifest} from './app/vite/plugins/web-manifest';
 
 const isVitest = process.env.VITEST === 'true';
 
@@ -44,6 +46,15 @@ export default defineConfig({
     // build-time globals (__COPYRIGHT_YEARS__, __COPYRIGHT_HOLDER__) so
     // the footer copyright stays in lockstep with the legal artefact.
     copyrightFromLicense(),
+    // Rasterises `app/assets/favicon.svg` to PNG + multi-resolution ICO
+    // during the client build. Modern browsers use the SVG directly; these
+    // are fallbacks for older platforms.
+    faviconRasters(),
+    // Emits `site.webmanifest` at build time. Shares the icon set with
+    // `faviconRasters` via `app/config/web-manifest.ts`; sources `name`
+    // from the locale YAML's `brand.name` so a single edit in `de.yml`
+    // propagates to the PWA install title.
+    webManifest(),
     // react-router's vite plugin clashes with vitest's environment setup, so
     // skip it when running tests.
     ...(isVitest ? [] : [reactRouter()]),
@@ -67,6 +78,9 @@ export default defineConfig({
       content: `${ALLOW_ALL}\n`,
       sitemap: `${SITE_URL}/sitemap.xml`,
     })),
+    // Not wrapped in clientOnly: react-router writes build/client/index.html
+    // during the SSR build pass, after the client env's closeBundle has fired.
+    // Running on both envs lets the copy succeed on the SSR pass.
     spaFallback({outDir: absOutDir}),
   ],
   resolve: {

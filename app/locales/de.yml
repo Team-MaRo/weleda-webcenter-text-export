@@ -3,6 +3,7 @@ meta:
   page_description: 'XML in lesbaren Text verwandeln. Lokale Verarbeitung im Browser.'
 
 brand:
+  name: 'WebCenter Konverter'
   weleda_alt: 'Weleda'
   tagline: 'Web Center XML → Text Konverter'
 
