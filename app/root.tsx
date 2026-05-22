@@ -21,11 +21,14 @@ export const links: Route.LinksFunction = () => [
   {rel: 'manifest', href: '/site.webmanifest'},
 ];
 
-// Runs before React hydrates so the correct theme class is on <body> for the
-// first paint — avoids a light/dark flash. Reads localStorage, then
-// prefers-color-scheme. Kept as a tight string so it parses fast inline.
+// Runs in <head> before stylesheets evaluate. Writes to <html>
+// (`document.documentElement`) because <body> doesn't exist yet during head
+// parsing — putting the class on the root element pre-CSS-eval means the
+// first paint already has the correct theme, no FOUC. Also adds `html.js`
+// so the `no-js:` Tailwind variant can gate UI that has no meaningful no-JS
+// state. Kept minified to one line for the fastest parse before hydration.
 // eslint-disable-next-line style/max-len -- inline IIFE intentionally minified to one line for fastest parse before hydration (avoids theme FOUC)
-const themeBootstrap = `(function(){try{var k='weleda-konverter:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.body.classList.add(t);}catch(e){document.body.classList.add('light');}})();`;
+const themeBootstrap = `(function(){try{var k='weleda-konverter:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(t,'js');}catch(e){document.documentElement.classList.add('light','js');}})();`;
 
 export function Layout({children}: {children: React.ReactNode}) {
   return (
@@ -40,12 +43,14 @@ export function Layout({children}: {children: React.ReactNode}) {
         <meta name="apple-mobile-web-app-title" content="WebCenter Konverter" />
         <meta name="theme-color" content="#5e8c40" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#86bd67" media="(prefers-color-scheme: dark)" />
+        {/* Must run before <Links /> so the theme class is on <html> before
+            any stylesheet evaluates — that's what prevents the FOUC. */}
+        {/* eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- themeBootstrap is a constant string defined above; no user input, no escaping needed */}
+        <script dangerouslySetInnerHTML={{__html: themeBootstrap}} />
         <Meta />
         <Links />
       </head>
       <body suppressHydrationWarning>
-        {/* eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- themeBootstrap is a constant string defined above; no user input, no escaping needed */}
-        <script dangerouslySetInnerHTML={{__html: themeBootstrap}} />
         <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
         <ScrollRestoration />
         <Scripts />

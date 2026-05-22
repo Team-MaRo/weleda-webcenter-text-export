@@ -8,10 +8,10 @@ function readInitial(): Theme {
   if (typeof document === 'undefined') {
     return 'light';
   }
-  if (document.body.classList.contains('dark')) {
+  if (document.documentElement.classList.contains('dark')) {
     return 'dark';
   }
-  if (document.body.classList.contains('light')) {
+  if (document.documentElement.classList.contains('light')) {
     return 'light';
   }
   try {
@@ -37,8 +37,8 @@ export function useTheme() {
     } catch {
       // localStorage may throw in private mode / sandboxed contexts; ignore.
     }
-    document.body.classList.toggle('dark', theme === 'dark');
-    document.body.classList.toggle('light', theme === 'light');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('light', theme === 'light');
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
