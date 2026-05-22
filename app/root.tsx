@@ -1,6 +1,7 @@
 import type {Route} from './+types/root';
 import {I18nextProvider, useTranslation} from 'react-i18next';
 import {isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration} from 'react-router';
+import {THEME_COLOR_DARK, THEME_COLOR_LIGHT} from './hooks/useTheme';
 import {i18n} from './i18n';
 
 import './styles/tailwind.css';
@@ -24,11 +25,18 @@ export const links: Route.LinksFunction = () => [
 // Runs in <head> before stylesheets evaluate. Writes to <html>
 // (`document.documentElement`) because <body> doesn't exist yet during head
 // parsing — putting the class on the root element pre-CSS-eval means the
-// first paint already has the correct theme, no FOUC. Also adds `html.js`
-// so the `no-js:` Tailwind variant can gate UI that has no meaningful no-JS
-// state. Kept minified to one line for the fastest parse before hydration.
+// first paint already has the correct theme, no FOUC. Does three things in
+// one inline pass:
+//   1. Sets html.light / html.dark for the first paint. Reads localStorage,
+//      falls back to prefers-color-scheme.
+//   2. Adds html.js so the `no-js:` Tailwind variant can hide UI that has
+//      no meaningful no-JS state.
+//   3. Overrides every `<meta name="theme-color">` content so the mobile
+//      browser chrome (address-bar strip) follows the in-page theme even
+//      when it disagrees with the OS preference.
+// Kept minified to one line for the fastest parse before hydration.
 // eslint-disable-next-line style/max-len -- inline IIFE intentionally minified to one line for fastest parse before hydration (avoids theme FOUC)
-const themeBootstrap = `(function(){try{var k='weleda-konverter:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(t,'js');}catch(e){document.documentElement.classList.add('light','js');}})();`;
+const themeBootstrap = `(function(){try{var k='weleda-konverter:theme';var s=localStorage.getItem(k);var t=(s==='light'||s==='dark')?s:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.add(t,'js');var c=t==='dark'?'${THEME_COLOR_DARK}':'${THEME_COLOR_LIGHT}';document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',c);});}catch(e){document.documentElement.classList.add('light','js');}})();`;
 
 export function Layout({children}: {children: React.ReactNode}) {
   return (
@@ -41,8 +49,12 @@ export function Layout({children}: {children: React.ReactNode}) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="apple-mobile-web-app-title" content="WebCenter Konverter" />
-        <meta name="theme-color" content="#5e8c40" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#86bd67" media="(prefers-color-scheme: dark)" />
+        {/* Two metas so no-JS users still get OS-driven chrome colour. With
+            JS, the bootstrap below and the effect in useTheme overwrite both
+            `content` attrs to the chosen theme — whichever the browser picks
+            via the `media` query then shows the right colour regardless. */}
+        <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
         {/* Must run before <Links /> so the theme class is on <html> before
             any stylesheet evaluates — that's what prevents the FOUC. */}
         {/* eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- themeBootstrap is a constant string defined above; no user input, no escaping needed */}
