@@ -1,5 +1,5 @@
 import type {Plugin} from 'vite';
-import {mkdirSync, readFileSync} from 'node:fs';
+import {mkdirSync} from 'node:fs';
 import {join} from 'node:path';
 import process from 'node:process';
 import ViteYaml from '@modyfi/vite-plugin-yaml';
@@ -17,11 +17,14 @@ import {webManifest} from './app/vite/plugins/web-manifest';
 
 const isVitest = process.env.VITEST === 'true';
 
-// Single source of truth for the deployed hostname: public/CNAME. GitHub
-// Pages reads it to bind the custom domain; sitemap + robots read it here
-// so both stay in lockstep with a single edit.
-const cname = readFileSync(join(process.cwd(), 'public', 'CNAME'), 'utf8').trim();
-const SITE_URL = `https://${cname}`;
+// Single source of truth for the deployed hostname: Settings → Pages →
+// Custom domain on the GitHub repo. CI workflows (deploy-gh-pages.yml,
+// docker.yml) fetch it via the Pages REST API and pass it in as
+// SITE_HOST; sitemap + robots read it here. Local dev falls back to
+// localhost because no env var is set.
+const trimmedHost = process.env.SITE_HOST?.trim();
+const SITE_HOST = trimmedHost === undefined || trimmedHost === '' ? 'localhost' : trimmedHost;
+const SITE_URL = `https://${SITE_HOST}`;
 const OUT_DIR = 'build/client';
 const absOutDir = join(process.cwd(), OUT_DIR);
 
