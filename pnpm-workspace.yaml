@@ -2,6 +2,10 @@ allowBuilds:
   '@parcel/watcher': true
   '@tailwindcss/oxide': true
   esbuild: true
+  sharp: true
+
+minimumReleaseAgeExclude:
+  - sass@1.100.0
 
 # Force transitive js-yaml >= 4.1.1 (prototype-pollution fix, GHSA in 4.1.0
 # pulled in by @modyfi/vite-plugin-yaml 1.1.1). Drop this once that plugin
