@@ -23,7 +23,7 @@ export function ThemeToggle() {
       // `isDark` only drives `aria-label` / `title` / `aria-pressed` —
       // visual state is CSS-driven, so the correct icon is shown from
       // frame one with no SSR-vs-client reconciliation flash.
-      className="relative size-8 border border-transparent bg-transparent text-ink-mute rounded-md cursor-pointer transition-colors duration-150 hover:bg-bg-soft hover:text-ink hover:border-ink-mute focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 grid place-items-center overflow-hidden"
+      className="relative size-8 border border-transparent bg-transparent text-ink-mute rounded-md cursor-pointer transition-colors duration-150 hover:bg-bg-soft hover:text-ink hover:border-ink-mute focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 grid place-items-center overflow-hidden no-js:hidden"
       onClick={toggle}
       aria-label={label}
       title={label}

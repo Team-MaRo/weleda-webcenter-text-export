@@ -197,7 +197,7 @@ export function Result({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 no-js:hidden">
           <Button copied={copied} type="button" onClick={handleCopy}>
             {copied
               ? <CheckIcon width={14} height={14} />
@@ -220,7 +220,7 @@ export function Result({
         </div>
       </header>
 
-      <div className="border-t border-line-soft flex items-center gap-2.5 bg-bg text-sm text-ink-mute pl-5 pr-3.5 py-2.5">
+      <div className="border-t border-line-soft flex items-center gap-2.5 bg-bg text-sm text-ink-mute pl-5 pr-3.5 py-2.5 no-js:hidden">
         <SearchIcon width={14} height={14} />
         <input
           className="appearance-none border-0 bg-transparent flex-1 text-sm text-ink py-1 outline-none min-w-0 placeholder:text-ink-mute"
