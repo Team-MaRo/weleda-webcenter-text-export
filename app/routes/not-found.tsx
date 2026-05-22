@@ -1,11 +1,7 @@
 import {useTranslation} from 'react-i18next';
+import {FallbackPage} from '~/components/FallbackPage';
 
 export default function NotFound() {
   const {t} = useTranslation();
-  return (
-    <main className="fallback-page">
-      <h1>{t('not_found.title')}</h1>
-      <p>{t('not_found.message')}</p>
-    </main>
-  );
+  return <FallbackPage title={t('not_found.title')} message={t('not_found.message')} />;
 }

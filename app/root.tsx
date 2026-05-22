@@ -1,6 +1,7 @@
 import type {Route} from './+types/root';
 import {I18nextProvider, useTranslation} from 'react-i18next';
 import {isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration} from 'react-router';
+import {FallbackPage} from './components/FallbackPage';
 import {THEME_COLOR_DARK, THEME_COLOR_LIGHT} from './hooks/useTheme';
 import {i18n} from './i18n';
 
@@ -24,13 +25,15 @@ export const links: Route.LinksFunction = () => [
 
 // Runs in <head> before stylesheets evaluate. Writes to <html>
 // (`document.documentElement`) because <body> doesn't exist yet during head
-// parsing — putting the class on the root element pre-CSS-eval means the
-// first paint already has the correct theme, no FOUC. Does three things in
-// one inline pass:
-//   1. Sets html.light / html.dark for the first paint. Reads localStorage,
-//      falls back to prefers-color-scheme.
-//   2. Adds html.js so the `no-js:` Tailwind variant can hide UI that has
-//      no meaningful no-JS state.
+// parsing — putting the class on the root element pre-CSS-eval means body
+// inherits the dark variable cascade from its first computed style, so the
+// global `body, body *` transition in _base.scss has nothing to animate.
+// Does three things in one inline pass:
+//   1. Sets html.light / html.dark for the first paint (avoids theme FOUC
+//      and the cross-fade that fires when the class is added post-paint).
+//      Reads localStorage, falls back to prefers-color-scheme.
+//   2. Adds html.js so the `no-js:` Tailwind variant hides UI that has no
+//      meaningful no-JS state.
 //   3. Overrides every `<meta name="theme-color">` content so the mobile
 //      browser chrome (address-bar strip) follows the in-page theme even
 //      when it disagrees with the OS preference.
@@ -50,9 +53,9 @@ export function Layout({children}: {children: React.ReactNode}) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="apple-mobile-web-app-title" content="WebCenter Konverter" />
         {/* Two metas so no-JS users still get OS-driven chrome colour. With
-            JS, the bootstrap below and the effect in useTheme overwrite both
-            `content` attrs to the chosen theme — whichever the browser picks
-            via the `media` query then shows the right colour regardless. */}
+            JS, the bootstrap below and `applyTheme` overwrite both `content`
+            attrs to the chosen theme — whichever the browser picks via the
+            `media` query then shows the right colour regardless. */}
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
         {/* Must run before <Links /> so the theme class is on <html> before
@@ -82,10 +85,5 @@ export function ErrorBoundary({error}: Route.ErrorBoundaryProps) {
     : error instanceof Error
       ? error.message
       : t('errors.unknown');
-  return (
-    <main className="fallback-page">
-      <h1>{t('errors.generic_title')}</h1>
-      <p>{message}</p>
-    </main>
-  );
+  return <FallbackPage title={t('errors.generic_title')} message={message} />;
 }

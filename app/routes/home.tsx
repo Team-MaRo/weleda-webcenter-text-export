@@ -103,11 +103,11 @@ export default function Home() {
   return (
     <>
       <Topbar />
-      <main className="page-main">
+      <main className="container flex-1 px-8 max-md:px-5 pt-14 pb-8 max-md:pt-8 max-md:pb-6">
         <Lede />
         <Dropzone onFileChosen={handleFile} />
         {actionData && 'error' in actionData && actionData.error && (
-          <p className="upload-error" role="alert">
+          <p className="mt-4 px-3.5 py-2.5 bg-bg-soft border-l-4 border-accent-d rounded-md text-ink text-sm" role="alert">
             {t(errorMessageKey(actionData.error))}
           </p>
         )}
