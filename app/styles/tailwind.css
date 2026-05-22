@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+/* Tailwind theme: only tokens we want Tailwind to consume directly.
+   Colours stay in main.scss because the runtime light/dark flip relies
+   on a `:root` + `html.dark` cascade that @theme can't replicate. */
+@theme {
+  /* Color tokens — reference the runtime CSS variables in main.scss so
+     the light/dark flip cascade still works (var() resolves at use-time,
+     so `text-ink` follows html.dark just like raw var(--ink) does). */
+  --color-bg:           var(--bg);
+  --color-bg-soft:      var(--bg-soft);
+  --color-paper:        var(--paper);
+  --color-paper-hover:  var(--paper-hover);
+  --color-ink:          var(--ink);
+  --color-ink-soft:     var(--ink-soft);
+  --color-ink-mute:     var(--ink-mute);
+  --color-line:         var(--line);
+  --color-line-soft:    var(--line-soft);
+  --color-accent:       var(--accent);
+  --color-accent-d:     var(--accent-d);
+  --color-accent-s:     var(--accent-s);
+  --color-accent-fg:    var(--accent-fg);
+  --color-warn:         var(--warn);
+  --color-toast-bg:     var(--toast-bg);
+  --color-toast-fg:     var(--toast-fg);
+  --color-header:       var(--header-bg);
+
+  /* Fonts mirror the Google Fonts <link> in root.tsx. */
+  --font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Lora', Georgia, serif;
+
+  /* Project radius — Tailwind's default scale skips 14px / 10px. */
+  --radius-card: 14px;
+  --radius-pill: 10px;
+
+  /* OKLCH shadows already declared as runtime CSS vars in _tokens.scss
+     (light + dark variants). Alias them to Tailwind shadow tokens so
+     `shadow-card-sm` / `shadow-card-md` flip with the theme cascade. */
+  --shadow-card-sm: var(--shadow-sm);
+  --shadow-card-md: var(--shadow-md);
+
+  /* Soft easing curve for transitions that should feel deliberate
+     (drop zone hover, result panel reveal). */
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Display heading — used by Lede h1, 404 page, ErrorBoundary. The
+     paired tokens let `text-display` emit font-size + line-height +
+     letter-spacing in one utility. */
+  --text-display: 2.375rem;            /* 38px */
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.01em;
+
+  /* Prose-narrow cap for body text columns measured in ch — narrower
+     than Tailwind's default max-w-prose (65ch). Exposed as
+     `max-w-prose-narrow`. */
+  --container-prose-narrow: 56ch;
+}
+
+/* Class-based dark variant. Overrides Tailwind's default `dark:` (which
+   uses `prefers-color-scheme: dark`) to follow this project's
+   `html.dark` cascade instead. Color tokens already flip via the
+   main.scss cascade, so `dark:` is mostly useful for transform/opacity
+   utilities on elements like the theme-toggle icon swap. */
+@custom-variant dark (&:where(html.dark, html.dark *));
+
+/* `no-js:` — applies when the inline themeBootstrap hasn't added the
+   `.js` class to <html> (script disabled, blocked, or failed). Used to
+   hide UI that has no meaningful no-JS state (theme toggle, etc). */
+@custom-variant no-js (&:where(html:not(.js), html:not(.js) *));
+
+/* Custom container caps. Stepped to project breakpoints; tops out at
+   ~980px on `lg` (the prior brand width) and never grows beyond. Each
+   cap sits 1rem below its breakpoint so the container hits its max-width
+   immediately at every breakpoint and doesn't drift as the viewport
+   widens past the breakpoint by the scrollbar's width. */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  @media (min-width: 40rem) { max-width: 39rem; }     /* sm  640 → 624 */
+  @media (min-width: 48rem) { max-width: 47rem; }     /* md  768 → 752 */
+  @media (min-width: 64rem) { max-width: 61.25rem; }  /* lg 1024 → 980 (cap) */
+}
