@@ -24,6 +24,8 @@
   --shadow-md:    0 6px 24px -8px oklch(20% 5% 180deg / 0.10), 0 0 0 1px oklch(20% 5% 180deg / 0.05);
   --radius:       14px;
   --radius-sm:    10px;
+
+  color-scheme: light;
 }
 
 html.dark {
@@ -47,6 +49,7 @@ html.dark {
   --toast-fg:     oklch(18% 3% 200deg);
   --shadow-sm:    0 1px 2px oklch(0% 0% 0deg / 0.30), 0 0 0 1px oklch(0% 0% 0deg / 0.25);
   --shadow-md:    0 8px 28px -8px oklch(0% 0% 0deg / 0.55), 0 0 0 1px oklch(0% 0% 0deg / 0.30);
+
   color-scheme: dark;
 }
 
@@ -77,6 +80,7 @@ html.dark {
     --toast-fg:     oklch(18% 3% 200deg);
     --shadow-sm:    0 1px 2px oklch(0% 0% 0deg / 0.30), 0 0 0 1px oklch(0% 0% 0deg / 0.25);
     --shadow-md:    0 8px 28px -8px oklch(0% 0% 0deg / 0.55), 0 0 0 1px oklch(0% 0% 0deg / 0.30);
+
     color-scheme: dark;
   }
 }
