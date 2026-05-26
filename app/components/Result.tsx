@@ -1,5 +1,6 @@
 import type {ChangeEvent, ReactNode} from 'react';
 import type {Segment} from '~/lib/xml-to-text/convert';
+import classNames from 'classnames';
 import {useDeferredValue, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import CheckIcon from '~/assets/icons/check.svg?react';
@@ -8,6 +9,7 @@ import CopyIcon from '~/assets/icons/copy.svg?react';
 import DownloadIcon from '~/assets/icons/download.svg?react';
 import FileIcon from '~/assets/icons/file.svg?react';
 import SearchIcon from '~/assets/icons/search.svg?react';
+import {Button} from '~/components/Button';
 import {escapeRegex, formatNumber, formatSize} from '~/lib/format';
 
 interface Props {
@@ -169,17 +171,25 @@ export function Result({
     return {renderedParagraphs: out, matchCount: total};
   }, [paragraphs, debounced]);
 
-  const className = `result${visible ? ' is-visible' : ''}`;
-
   return (
-    <article className={className} aria-live="polite">
-      <header className="result-head">
-        <div className="file-meta">
-          <div className="file-icon" aria-hidden="true">
+    <article
+      className={classNames(
+        'result-panel mt-10 bg-paper border border-line-soft rounded-card shadow-card-sm overflow-hidden',
+        visible
+          ? 'opacity-100 translate-y-0 pointer-events-auto'
+          : 'opacity-0 translate-y-2 pointer-events-none',
+      )}
+      aria-live="polite"
+    >
+      <header className="flex items-center justify-between px-5 py-4 border-b border-line-soft gap-4 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-accent-s text-accent-d grid place-items-center shrink-0" aria-hidden="true">
             <FileIcon width={16} height={16} />
           </div>
-          <div className="file-meta-text">
-            <div className="file-name">{fileName || t('result.empty_dash')}</div>
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis max-w-sm max-md:max-w-44">
+              {fileName || t('result.empty_dash')}
+            </div>
             <div className="file-stats">
               <span>{fileSize > 0 ? formatSize(fileSize) : t('result.size_initial')}</span>
               <span>{formatNumber(words, lang)} {t('result.words_suffix')}</span>
@@ -187,37 +197,39 @@ export function Result({
             </div>
           </div>
         </div>
-        <div className="actions">
-          <button className={`btn${copied ? ' is-copied' : ''}`} type="button" onClick={handleCopy}>
-            <CopyIcon className="copy-i" width={14} height={14} />
-            <CheckIcon className="check" width={14} height={14} />
+        <div className="flex items-center gap-1.5 no-js:hidden">
+          <Button copied={copied} type="button" onClick={handleCopy}>
+            {copied
+              ? <CheckIcon width={14} height={14} />
+              : <CopyIcon width={14} height={14} />}
             <span>{copied ? t('actions.copied') : t('actions.copy')}</span>
-          </button>
-          <button className="btn" type="button" onClick={handleDownload}>
+          </Button>
+          <Button type="button" onClick={handleDownload}>
             <DownloadIcon width={14} height={14} />
             <span>{t('actions.download')}</span>
-          </button>
-          <button
-            className="icon-btn"
+          </Button>
+          <Button
+            variant="icon"
             type="button"
             onClick={onClear}
             title={t('actions.reset')}
             aria-label={t('actions.reset')}
           >
             <CloseIcon width={15} height={15} />
-          </button>
+          </Button>
         </div>
       </header>
 
-      <div className="search">
+      <div className="border-t border-line-soft flex items-center gap-2.5 bg-bg text-sm text-ink-mute pl-5 pr-3.5 py-2.5 no-js:hidden">
         <SearchIcon width={14} height={14} />
         <input
+          className="appearance-none border-0 bg-transparent flex-1 text-sm text-ink py-1 outline-none min-w-0 placeholder:text-ink-mute"
           type="search"
           placeholder={t('search.placeholder')}
           value={query}
           onChange={handleSearchChange}
         />
-        <span className="count">
+        <span className="tabular-nums text-xs">
           {debounced.trim()
             ? matchCount > 0
               ? t('search.matches_other', {count: matchCount})

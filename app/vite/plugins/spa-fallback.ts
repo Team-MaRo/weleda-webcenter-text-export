@@ -12,9 +12,9 @@ interface Options {
 // the React Router not-found route render. SSR builds emit no index.html
 // in this dir (the server generates HTML on the fly), so the existsSync
 // guard naturally turns this into a no-op there.
-export function staticArtifacts(opts: Options): Plugin {
+export function spaFallback(opts: Options): Plugin {
   return {
-    name: 'static-artifacts',
+    name: 'spa-fallback',
     apply: 'build',
     closeBundle() {
       const indexHtml = join(opts.outDir, 'index.html');

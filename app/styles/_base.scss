@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  // Body only transitions `background-color`. Putting `color` here makes
+  // every descendant with its own themed `color` + a transition stall —
+  // Chrome re-targets the descendant's animation each frame against body's
+  // animating inherited colour, trickling over ~2× the intended duration.
+  // Per-utility color transitions are declared in `@layer base` below.
+  transition: background-color var(--theme-transition) ease;
+}
+
+// Theme-flip transitions split into two groups, both in @layer base so any
+// Tailwind utility `transition-[…]` (in @layer utilities) overrides cleanly.
+//
+// 1. Elements with only `bg-*` / `border-*` themed classes (no `text-*`):
+//    transition `background-color` + `border-color` ONLY. Don't include
+//    `color` — these elements (e.g. `<header class="bg-header border-…">`)
+//    inherit colour, and an unnecessary `color` entry in their transition
+//    makes them animate inherited colour and stall their descendants.
+// 2. Elements with a themed `text-*` class: full transition list. This rule
+//    comes AFTER the `:is(…)` block so elements with both `text-*` and
+//    `bg-*` (e.g. Button's `bg-paper text-ink`) win the cascade and get
+//    all three property transitions.
+//
+// Themed Tailwind utility class names enumerated from the `--color-*`
+// aliases in `tailwind.css`. All webcenter colour tokens flip between
+// themes, so none are excluded.
+@layer base {
+  :is(
+    .bg-bg, .bg-bg-soft, .bg-paper, .bg-paper-hover,
+    .bg-accent, .bg-accent-d, .bg-accent-s, .bg-accent-fg,
+    .bg-warn, .bg-toast-bg, .bg-header,
+    .border-line, .border-line-soft,
+    .border-ink, .border-ink-soft, .border-ink-mute,
+    .border-accent, .border-accent-d
+  ) {
+    transition:
+      background-color var(--theme-transition) ease,
+      border-color     var(--theme-transition) ease;
+  }
+  .text-ink, .text-ink-soft, .text-ink-mute,
+  .text-accent, .text-accent-d, .text-accent-fg,
+  .text-warn, .text-toast-fg {
+    transition:
+      color            var(--theme-transition) ease,
+      background-color var(--theme-transition) ease,
+      border-color     var(--theme-transition) ease;
+  }
+  // Tailwind's `[&_<child>]:text-<themed>` variant paints colour on a
+  // descendant via a child selector. Animating the descendant's `color`
+  // directly would retarget against the parent's own `color` transition
+  // (~2× lag). Paint via `-webkit-text-fill-color` instead — different
+  // property than the parent's transitioning `color`, so Chrome doesn't
+  // retarget. (Keyword `currentColor` doesn't trigger transitions, so
+  // reference the variable directly.) Bg/border on the same descendant
+  // are property-independent, so they can use regular transitions.
+  // Add a new pair of rules below for each combination found in the JSX.
+  [class*="[&_em]:text-accent-d"] em {
+    -webkit-text-fill-color: var(--accent-d);
+    transition: -webkit-text-fill-color var(--theme-transition) ease;
+  }
+  // Dropzone's `<p class="… [&_kbd]:text-ink-soft [&_kbd]:bg-paper
+  // [&_kbd]:border-line">`: kbd descendants get all three themed properties
+  // via descendant variants and need a matching transition. Border-color
+  // and background-color are property-independent of the parent's `color`
+  // transition, so they animate normally; only `color` needs the fill-color
+  // workaround.
+  [class*="[&_kbd]:text-ink-soft"] kbd {
+    -webkit-text-fill-color: var(--ink-soft);
+    transition:
+      -webkit-text-fill-color var(--theme-transition) ease,
+      background-color        var(--theme-transition) ease,
+      border-color            var(--theme-transition) ease;
+  }
+}
+
+// Honor OS / app accessibility preferences. Single blanket rule catches every
+// transition + animation across the app without per-component @media guards.
+// `0.01ms` (not `0s`) keeps `transitionend` / `animationend` listeners firing.
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Reduced transparency: solid the accent glow + sticky header bg, and drop
+// all backdrop blur (drag overlay + header). Tokens that carry an alpha
+// channel (`--accent-glow`, `--header-bg`) get flipped to fully opaque
+// counterparts so nothing shows page content bleeding through underneath
+// once the blur is disabled.
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  html.dark {
+    --accent-glow: transparent;
+  }
+  :root      { --header-bg: oklch(98.5% 1.25% 90deg); }
+  html.dark  { --header-bg: oklch(18% 3% 200deg); }
+
+  // No-JS + OS dark: matches the no-JS dark fallback selector in
+  // _tokens.scss (specificity 0,2,1) — without this rule, that
+  // translucent declaration outranks the :root opaque override above
+  // and the header bleeds through even under reduced-transparency.
+  // Source order wins at equal specificity, so this flips it to opaque.
+  @media (prefers-color-scheme: dark) {
+    html:not(.light):not(.dark) {
+      --header-bg: oklch(18% 3% 200deg);
+    }
+  }
+
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
