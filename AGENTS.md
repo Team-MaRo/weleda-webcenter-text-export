@@ -101,12 +101,13 @@ The IIFE is intentionally minified to one line so it parses inline before styles
 
 ### Styling: Tailwind v4 utilities + scoped SCSS
 
-Visual rules are split across four files in `app/styles/`:
+Visual rules are split across five files in `app/styles/`:
 
-- **`tailwind.css`** — `@import "tailwindcss"` + `@theme` block (color aliases to runtime vars, plus `--radius-card: 14px`, `--radius-pill: 10px`, `--shadow-card-sm/md: var(--shadow-sm/md)`, `--ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1)`, `--text-display: 2.375rem` with paired `line-height`/`letter-spacing`, `--container-prose-narrow: 56ch`). Plus three customs: `@custom-variant dark`, `@custom-variant no-js`, and `@utility container { … }` (stepped caps 39/47/61.25 rem to top out at 980 px on lg+, mirroring the project's brand cap).
-- **`_tokens.scss`** — `:root` + `html.dark` + the no-JS-dark `@media` block. All runtime CSS vars live here.
-- **`_base.scss`** — element resets (`*`, `html`, `body`) and accessibility media queries (`@media (prefers-reduced-motion)` blanket transition kill, `@media (prefers-reduced-transparency)` opacity overrides + `backdrop-filter: none`).
-- **`_components.scss`** — what couldn't be expressed as utilities. Currently `.no-js-submit` + `.no-js-selected-hint` + the two `:has()` Dropzone form rules, `.file-stats span::before` separator counter, `.output` prose typography (`p` + `mark`), one `@media (max-width: 640px) { .output { … } }` responsive override. Everything else is Tailwind utilities directly on the JSX.
+- **`tailwind.css`** — `@import "tailwindcss"` + a regular `@theme` block (font / radius / shadow alias / `--ease-soft` / `--text-display` / `--container-prose-narrow`) + a `@theme inline` block (the `--color-*` runtime-var aliases) + `@utility duration-theme { transition-duration: var(--theme-transition) }` + `@custom-variant dark` + `@custom-variant no-js` + `@utility container` (stepped caps 39/47/61.25 rem to top out at 980 px on lg+).
+- **`_mixins.scss`** — `@mixin dark` (top-level) + `@mixin in-dark` (nested with `&`). Both emit `html.dark` + the no-JS `@media (prefers-color-scheme: dark) html:not(.dark):not(.light)` fallback. Use these instead of writing the selectors by hand.
+- **`_tokens.scss`** — `:root` with the runtime CSS vars + `--theme-transition` motion token + a single `@include dark { … }` block (collapses what used to be a duplicated `html.dark` + no-JS-dark `@media` pair).
+- **`_base.scss`** — element resets (`*`, `html`, `body`), `body { transition: background-color var(--theme-transition) ease }` (bg only — see Theme crossfade below), the property-split `@layer base` per-utility transition rule, `[&_em]:text-accent-d` / `[&_kbd]:text-ink-soft` descendant rules, and accessibility media queries (`@media (prefers-reduced-motion)` blanket transition kill, `@media (prefers-reduced-transparency)` opacity overrides + `backdrop-filter: none`).
+- **`_components.scss`** — what couldn't be expressed as utilities: `.no-js-submit` + `.no-js-selected-hint` + the two `:has()` Dropzone form rules, `.file-stats span::before` separator counter, `.output` prose typography (`p` + `mark`) with their own theme transitions, `.result-panel` multi-property transition (opacity/transform at 250 ms + bg/border at `--theme-transition`), one `@media (max-width: 640px) { .output { … } }` responsive override. Everything else is Tailwind utilities directly on the JSX.
 - **`main.scss`** is just `@use 'tokens'; @use 'base'; @use 'components';`.
 
 Component-level patterns:
@@ -129,11 +130,43 @@ Both handled centrally in `_base.scss`:
 - **`@media (prefers-reduced-motion: reduce)`** — site-wide blanket rule that snaps every transition + animation to `0.01ms !important` (kept above zero so `transitionend` listeners still fire). Catches every Tailwind utility transition + SCSS rule.
 - **`@media (prefers-reduced-transparency: reduce)`** — flips `--accent-glow` to `transparent`, flips `--header-bg` to its opaque counterpart for `:root` AND `html.dark` AND the no-JS-dark selector (specificity 0,2,1 — needs the nested `@media (prefers-color-scheme: dark) { html:not(.light):not(.dark) { … } }` to win over the no-JS-dark translucent rule), and applies `backdrop-filter: none !important` to every element so the header's `backdrop-blur-md` drops cleanly.
 
-#### Theme flip: most elements snap, small interactive elements cross-fade
+#### Theme crossfade mechanics
 
-There is **no** global `body, body *` transition rule. On theme toggle, the body bg + page text + icons + headers snap instantly to the new palette — no in-between interpolated frame, so no AA-recomputation flicker on text or `currentColor` icons. Only elements that carry their own `transition-*` utility (Button, ThemeToggle button, Dropzone label + icon-wrap) cross-fade during the flip. State-machine animations (drag overlay, toast, result panel reveal, theme toggle icon swap) animate their own opacity/transform unchanged. `--header-bg` and `backdrop-filter` also snap on the `prefers-reduced-transparency` toggle (filter functions can't interpolate to/from `none` anyway).
+The theme flip is driven by **one runtime variable**, `--theme-transition` (default `400ms`), and three rules in `_base.scss`:
 
-If you ever feel like adding back a `body, body * { transition: … }` rule, expect text/icon flicker during theme flip — Chromium's text repaint on interpolated `color` values goes through subpixel-AA recalc that's visible for a frame or two. Per-element transitions are the safe pattern.
+1. **`body { transition: background-color var(--theme-transition) ease }`** — body bg fades smoothly. `color` is **deliberately NOT in body's transition**. A `color` transition on body retargets every descendant's own `color` transition every frame against body's animating inherited colour, stalling each descendant for the full theme window then playing back over a second window (~2× lag, visible as "icon stays bright while page goes dark, then quickly snaps at the end"). Body bg snap is fine; the contrast change is what matters.
+2. **`@layer base` per-utility transition rule, property-split.** `:is(.bg-bg, .bg-paper, …, .border-line, …)` transitions `background-color` + `border-color` only — no `color`. `.text-ink, .text-ink-soft, …, .text-toast-fg` transitions all three (`color` + `background-color` + `border-color`). The text rule comes after, so elements with both `text-*` AND `bg-*` (e.g. Button's `bg-paper text-ink`) win the cascade and get the full list. Sections / headers that only set `bg-*` / `border-*` don't drag `color` through, so they don't stall their text descendants.
+3. **`-webkit-text-fill-color` workaround for `[&_<child>]:text-<themed>` variants.** Tailwind's child-selector variant (e.g. `[&_em]:text-accent-d` on the Lede h1, `[&_kbd]:text-ink-soft` on Dropzone's keyboard-shortcut tip) paints `color: var(--…)` on the descendant via a child selector. Animating that `color` directly retargets against the parent's `color` transition. `_base.scss` has dedicated rules:
+
+   ```scss
+   [class*="[&_em]:text-accent-d"] em {
+     -webkit-text-fill-color: var(--accent-d);
+     transition: -webkit-text-fill-color var(--theme-transition) ease;
+   }
+   [class*="[&_kbd]:text-ink-soft"] kbd {
+     -webkit-text-fill-color: var(--ink-soft);
+     transition:
+       -webkit-text-fill-color var(--theme-transition) ease,
+       background-color        var(--theme-transition) ease,
+       border-color            var(--theme-transition) ease;
+   }
+   ```
+
+   `-webkit-text-fill-color` is a different property than the parent's transitioning `color`, so Chrome doesn't retarget. `currentColor` doesn't trigger transitions (it's a keyword), so reference the variable directly. `background-color` / `border-color` on the same descendant ARE property-independent of parent `color`, so they use regular transitions in the same rule.
+
+`--theme-transition` is tested correct at 200 ms, 400 ms, 4 s, 8 s — behaviour scales linearly with no element drifting out of sync. Tune it in `_tokens.scss` and every transition stays coherent.
+
+**Interactive components** (Button, ThemeToggle, Dropzone) use Tailwind utilities like `transition-[background-color,border-color,color] duration-theme ease`. **Don't use `transition-colors`** — its expanded property list (color, bg, border, outline-color, text-decoration-color, fill, stroke, gradient stops) was shown to cause subtle issues on the ThemeToggle in the sister project. Explicit list of themed properties only.
+
+**Reveal-style wrappers (Result panel)** can't use Tailwind's bare `transition` shorthand — it drops themed bg/border from the property list. `.result-panel` in `_components.scss` declares the full transition explicitly: `opacity` + `transform` at `250ms` for the panel reveal, `bg-color` + `border-color` at `var(--theme-transition)` for the theme flip. Add similar CSS for any future wrapper that animates entrance AND wraps themed surfaces.
+
+#### duration-theme is an @utility, not an @theme token
+
+`tailwind.css` declares it as `@utility duration-theme { transition-duration: var(--theme-transition) }`. Tailwind v4 only mints `.duration-*` utilities from literal `<time>` values; declaring `--duration-theme: var(--theme-transition)` in a `@theme` block silently doesn't emit a utility (the class falls through to Tailwind's 150 ms default, causing a 3-frame snap). The explicit `@utility` bypasses the namespace heuristic.
+
+#### --color-* aliases live in @theme inline
+
+`tailwind.css` has two `@theme` blocks: a regular one for value tokens (font / radius / shadow / ease / text-display / container-prose-narrow) and a separate `@theme inline { … }` block for all `--color-*` aliases. With `inline`, Tailwind substitutes the right-hand-side directly into utilities (`.text-ink { color: var(--ink) }`) instead of going through a `--color-ink: var(--ink)` alias. The alias chain interferes with theme transitions: consumers can see a stale value mid-animation in some browsers.
 
 ### `no-js:` Tailwind variant — hide JS-only UI
 
@@ -245,5 +278,13 @@ The footer also carries a `footer.weleda_credit` line crediting Weleda AG for th
 - **`ts/promise-function-async` on `wrapSegment`** — React 19's `ReactNode` includes `Promise<ReactNode>`, which trips the rule on synchronous renderers. Suppression has a `--` rationale; adding `async` would wrap each node in a Promise React can't render.
 - **`release.yml`-managed lines** — the `version = "X.Y.Z"; # x-release-please-version` line in `flake.nix` is bot-managed. Hand-edits get overwritten on the next release PR.
 - **Don't reach for `[Npx]` arbitrary Tailwind values.** Snap to the named scale (`text-xs`, `rounded-md`, `size-8`) when close enough; for project-specific values that don't fit, add a `@theme` token (e.g. `--text-display`, `--container-prose-narrow`). Arbitrary values are reserved for genuine one-offs where no named scale comes close (e.g. `translate-y-[120%]` on the theme-icon swap).
-- **No global theme cross-fade rule.** Theme flip snaps text + bg + icons instantly; only specific elements with their own `transition-*` utility (Button, ThemeToggle, Dropzone) cross-fade. Don't add a `body, body * { transition: … }` rule back — text/icon color interpolation produces a brief AA-recomputation flicker that the snap avoids.
+- **Theme crossfade is property-split: body bg, then per-utility for everything else.** `body` transitions `background-color` ONLY (a `color` transition on body retargets every descendant's color transition each frame → ~2× lag). Element color/bg/border transitions live in the `@layer base` per-utility rule. **Don't put `color` in body's transition** and **don't drop `color` from the `.text-*` rule** in `@layer base`.
+- **`@layer base` per-utility rule is property-split.** `:is(.bg-*, .border-*)` gets bg + border only; `.text-*` gets color + bg + border. Order: `.text-*` LAST so elements with both `text-*` AND `bg-*` (Button's `bg-paper text-ink`) win the shorthand cascade with the full property list. Sections / Topbar / wrappers that only set `bg-*` / `border-*` don't drag `color` through, so they don't stall their themed text descendants.
+- **`duration-theme` must be declared via `@utility`, not `@theme --duration-theme`.** Tailwind v4 only mints `.duration-*` from literal `<time>` values; `var()` references are silently skipped (utility falls through to 150 ms default, causing a 3-frame snap on theme flip).
+- **`--color-*` aliases live in `@theme inline`, not a regular `@theme` block.** Regular `@theme` serves a stale alias through the chain during a theme transition; `inline` substitutes `var(--ink)` directly into the utility.
+- **`-webkit-text-fill-color` workaround for `[&_<child>]:text-<themed>` variants.** Tailwind's child-selector variant paints color on the descendant via a parent selector, with no transition declared. Animating the descendant's `color` directly retargets against the parent's `color` transition. Paint via `-webkit-text-fill-color: var(--themed)` (different property, no retargeting) and transition that. Rules in `_base.scss` for `[&_em]:text-accent-d` (Lede h1) and `[&_kbd]:text-ink-soft` (Dropzone tip).
+- **Don't use `transition-colors` Tailwind utility on interactive elements.** Use an explicit themed-property list: `transition-[background-color,border-color,color] duration-theme ease`. The `transition-colors` expanded property list (outline-color, text-decoration-color, fill, stroke, gradient stops) was shown to cause subtle issues on the ThemeToggle in the sister project.
+- **`.result-panel` declares its full transition in CSS, not via Tailwind's bare `transition` utility.** The Tailwind shorthand drops themed bg/border. Use per-property durations in CSS for any wrapper that needs both an entrance animation AND themed surface transitions. Same pattern would apply to any future Reveal-like wrapper.
+- **Don't put `transition: fill, stroke` on `body *`.** Icon SVGs use `stroke="currentColor"`; a per-element stroke transition on them retargets against the parent's animating `color` every frame, causing a visible "icon stays bright then snaps at the end" lag.
+- **Don't write `html.dark` or `html.dark &` directly.** Use `@include dark { ... }` (top-level) or `@include in-dark { ... }` (nested) from `_mixins.scss` so the no-JS `prefers-color-scheme` fallback selector is emitted too.
 - **Reduced-transparency cascade has a no-JS-dark gap.** The `_base.scss` reduced-transparency block contains a nested `@media (prefers-color-scheme: dark) { html:not(.light):not(.dark) { --header-bg: opaque-dark } }`. Without it, the no-JS dark fallback rule (specificity 0,2,1) outranks the literal `:root` opaque override (0,1,0) and the header bleeds through under reduced-transparency + JS-disabled + OS-dark. Don't remove that nested rule.

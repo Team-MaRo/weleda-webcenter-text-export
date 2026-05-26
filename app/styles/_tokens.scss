@@ -1,6 +1,11 @@
 // ─── Design tokens (oklch palette from konverter design handoff) ─────────
-// Light is default; `html.dark` overrides the runtime variables. Component
-// rules consume the variables only — never the raw oklch literals.
+// Light is default; the `dark` mixin flips the runtime variables under both
+// `html.dark` (JS path) and `prefers-color-scheme: dark` on unset html
+// (no-JS path). Component rules consume the variables only — never the raw
+// oklch literals.
+
+@use 'mixins' as *;
+
 :root {
   --bg:           oklch(98.5% 1.25% 90deg);
   --bg-soft:      oklch(96.5% 2% 90deg);
@@ -25,10 +30,17 @@
   --radius:       14px;
   --radius-sm:    10px;
 
+  // Theme crossfade duration. Tunable here — all theme-related transitions
+  // route through this variable. Tested correct at any value (200ms, 4s,
+  // 8s — same behaviour, just scaled).
+  --theme-transition: 200ms;
+
   color-scheme: light;
 }
 
-html.dark {
+// Dark cascade — covers both `html.dark` (JS path) and the no-JS fallback
+// `@media (prefers-color-scheme: dark)` on unset html. See `_mixins.scss`.
+@include dark {
   --bg:           oklch(18% 3% 200deg);
   --bg-soft:      oklch(22% 3% 200deg);
   --paper:        oklch(24% 3.25% 200deg);
@@ -51,36 +63,4 @@ html.dark {
   --shadow-md:    0 8px 28px -8px oklch(0% 0% 0deg / 0.55), 0 0 0 1px oklch(0% 0% 0deg / 0.30);
 
   color-scheme: dark;
-}
-
-// No-JS fallback: the themeBootstrap script never runs, so <html> has
-// neither `.light` nor `.dark`. Honour the OS prefers-color-scheme by
-// applying the same dark overrides under that media query. With JS, the
-// bootstrap sets one of the two classes before first paint, so this rule
-// only matches when JS is unavailable.
-@media (prefers-color-scheme: dark) {
-  html:not(.light):not(.dark) {
-    --bg:           oklch(18% 3% 200deg);
-    --bg-soft:      oklch(22% 3% 200deg);
-    --paper:        oklch(24% 3.25% 200deg);
-    --paper-hover:  oklch(28% 3.5% 200deg);
-    --header-bg:    oklch(18% 3% 200deg / 0.75);
-    --ink:          oklch(96% 1.25% 90deg);
-    --ink-soft:     oklch(78% 2% 90deg);
-    --ink-mute:     oklch(60% 2.5% 90deg);
-    --line:         oklch(34% 3% 200deg);
-    --line-soft:    oklch(30% 3% 200deg);
-    --accent:       oklch(74% 32.5% 135deg);
-    --accent-d:     oklch(82% 32.5% 135deg);
-    --accent-s:     oklch(32% 15% 135deg);
-    --accent-fg:    oklch(18% 3% 200deg);
-    --accent-glow:  oklch(74% 32.5% 135deg / 0.10);
-    --warn:         oklch(72% 45% 35deg);
-    --toast-bg:     oklch(96% 1.25% 90deg);
-    --toast-fg:     oklch(18% 3% 200deg);
-    --shadow-sm:    0 1px 2px oklch(0% 0% 0deg / 0.30), 0 0 0 1px oklch(0% 0% 0deg / 0.25);
-    --shadow-md:    0 8px 28px -8px oklch(0% 0% 0deg / 0.55), 0 0 0 1px oklch(0% 0% 0deg / 0.30);
-
-    color-scheme: dark;
-  }
 }

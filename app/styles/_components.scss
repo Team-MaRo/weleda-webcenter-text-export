@@ -31,16 +31,34 @@
   color: var(--ink-mute);
   display: flex;
   gap: 10px;
+  transition: color var(--theme-transition) ease;
 
   span::before {
     content: '·';
     margin-right: 10px;
     color: var(--line);
+    transition: color var(--theme-transition) ease;
   }
 
   span:first-child::before {
     display: none;
   }
+}
+
+// ─── Result panel ────────────────────────────────────────────────────────
+// The Result `<article>` uses Tailwind's `transition-[opacity,transform]
+// duration-[250ms]` for its reveal animation, which sets the whole
+// transition shorthand and drops `background-color` / `border-color` from
+// the property list. With the themed `bg-paper` + `border-line-soft`
+// classes on the article, those properties would snap on theme flip.
+// Declare the full transition explicitly here, with per-property durations:
+// opacity/transform at the 250ms reveal speed, bg/border at theme-transition.
+.result-panel {
+  transition:
+    opacity          250ms                  ease,
+    transform        250ms                  ease,
+    background-color var(--theme-transition) ease,
+    border-color     var(--theme-transition) ease;
 }
 
 // ─── Output ──────────────────────────────────────────────────────────────
@@ -52,6 +70,7 @@
   color: var(--ink);
   max-height: 70vh;
   overflow-y: auto;
+  transition: color var(--theme-transition) ease;
 
   p {
     margin: 0 0 0.9em;
@@ -68,6 +87,9 @@
     color: var(--accent-d);
     padding: 0 2px;
     border-radius: 2px;
+    transition:
+      color            var(--theme-transition) ease,
+      background-color var(--theme-transition) ease;
   }
 }
 

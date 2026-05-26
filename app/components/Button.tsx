@@ -22,7 +22,7 @@ export function Button({variant = 'default', copied = false, className, children
     <button
       {...rest}
       className={classNames(
-        'cursor-pointer transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2',
+        'cursor-pointer transition-[background-color,border-color,color] duration-theme ease focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2',
         VARIANTS[variant],
         showCopied && 'bg-accent-s text-accent-d border-accent hover:bg-accent-s hover:border-accent',
         className,

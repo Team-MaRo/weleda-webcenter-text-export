@@ -174,7 +174,7 @@ export function Result({
   return (
     <article
       className={classNames(
-        'mt-10 bg-paper border border-line-soft rounded-card shadow-card-sm overflow-hidden transition-[opacity,transform] duration-[250ms]',
+        'result-panel mt-10 bg-paper border border-line-soft rounded-card shadow-card-sm overflow-hidden',
         visible
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 translate-y-2 pointer-events-none',

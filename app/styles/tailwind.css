@@ -4,27 +4,6 @@
    Colours stay in main.scss because the runtime light/dark flip relies
    on a `:root` + `html.dark` cascade that @theme can't replicate. */
 @theme {
-  /* Color tokens — reference the runtime CSS variables in main.scss so
-     the light/dark flip cascade still works (var() resolves at use-time,
-     so `text-ink` follows html.dark just like raw var(--ink) does). */
-  --color-bg:           var(--bg);
-  --color-bg-soft:      var(--bg-soft);
-  --color-paper:        var(--paper);
-  --color-paper-hover:  var(--paper-hover);
-  --color-ink:          var(--ink);
-  --color-ink-soft:     var(--ink-soft);
-  --color-ink-mute:     var(--ink-mute);
-  --color-line:         var(--line);
-  --color-line-soft:    var(--line-soft);
-  --color-accent:       var(--accent);
-  --color-accent-d:     var(--accent-d);
-  --color-accent-s:     var(--accent-s);
-  --color-accent-fg:    var(--accent-fg);
-  --color-warn:         var(--warn);
-  --color-toast-bg:     var(--toast-bg);
-  --color-toast-fg:     var(--toast-fg);
-  --color-header:       var(--header-bg);
-
   /* Fonts mirror the Google Fonts <link> in root.tsx. */
   --font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Lora', Georgia, serif;
@@ -54,6 +33,44 @@
      than Tailwind's default max-w-prose (65ch). Exposed as
      `max-w-prose-narrow`. */
   --container-prose-narrow: 56ch;
+}
+
+/* Color tokens — declared in a separate `@theme inline` so Tailwind inlines
+   the var() reference directly into utilities (e.g. `.text-ink { color:
+   var(--ink); }`) instead of going through a `--color-ink: var(--ink)`
+   alias. The alias chain interferes with theme transition: consumers can
+   see a stale value during the animation in some browsers. Inlining hands
+   them the runtime variable directly. */
+@theme inline {
+  --color-bg:           var(--bg);
+  --color-bg-soft:      var(--bg-soft);
+  --color-paper:        var(--paper);
+  --color-paper-hover:  var(--paper-hover);
+  --color-ink:          var(--ink);
+  --color-ink-soft:     var(--ink-soft);
+  --color-ink-mute:     var(--ink-mute);
+  --color-line:         var(--line);
+  --color-line-soft:    var(--line-soft);
+  --color-accent:       var(--accent);
+  --color-accent-d:     var(--accent-d);
+  --color-accent-s:     var(--accent-s);
+  --color-accent-fg:    var(--accent-fg);
+  --color-accent-glow:  var(--accent-glow);
+  --color-warn:         var(--warn);
+  --color-toast-bg:     var(--toast-bg);
+  --color-toast-fg:     var(--toast-fg);
+  --color-header:       var(--header-bg);
+}
+
+/* Duration alias — declared as explicit `@utility` rather than via
+   `@theme --duration-*` because Tailwind v4 only mints duration utilities
+   from `--duration-*` tokens holding a literal `<time>` value (e.g.
+   `150ms`). A `var()` reference (which we need so tuning the runtime
+   variable in `_tokens.scss` re-routes everywhere) is silently skipped,
+   so `.duration-theme` falls through to Tailwind's 150ms default. Defining
+   as `@utility` bypasses the namespace heuristic and emits unconditionally. */
+@utility duration-theme {
+  transition-duration: var(--theme-transition);
 }
 
 /* Class-based dark variant. Overrides Tailwind's default `dark:` (which

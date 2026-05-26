@@ -37,7 +37,7 @@ export function Dropzone({onFileChosen}: Props) {
     // ambiguous between root layout and index route; the query picks index.
     <form method="post" action="?index" encType="multipart/form-data" className="dropzone-form">
       <label
-        className="group block relative bg-paper border-[1.5px] border-dashed border-line rounded-card px-8 py-13 text-center cursor-pointer transition-[border-color,background,transform] duration-200 ease-soft hover:border-accent hover:bg-accent-s focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+        className="group block relative bg-paper border-[1.5px] border-dashed border-line rounded-card px-8 py-13 text-center cursor-pointer transition-[border-color,background-color,transform] duration-theme ease-soft hover:border-accent hover:bg-accent-s focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
         htmlFor="file-input"
         tabIndex={0}
         role="button"
@@ -45,7 +45,7 @@ export function Dropzone({onFileChosen}: Props) {
         onKeyDown={handleKey}
       >
         <div
-          className="size-14 mx-auto mb-4 rounded-full bg-bg-soft grid place-items-center text-ink-soft transition-colors duration-200 ease-soft group-hover:bg-paper-hover group-hover:text-accent-d"
+          className="size-14 mx-auto mb-4 rounded-full bg-bg-soft grid place-items-center text-ink-soft transition-[background-color,border-color,color] duration-theme ease-soft group-hover:bg-paper-hover group-hover:text-accent-d"
           aria-hidden="true"
         >
           <UploadIcon width={22} height={22} strokeWidth={1.6} />
