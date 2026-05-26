@@ -1,5 +1,46 @@
 # Changelog
 
+## [3.1.0](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/3.0.1...3.1.0) (2026-05-26)
+
+
+### ✨ Features
+
+* **a11y:** Hide JS-only UI with the no-js: variant ([85d9026](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/85d90266d2a3146d7c5aba76eb9b07a3faa3dca1))
+* **a11y:** Honor prefers-reduced-motion and prefers-reduced-transparency ([340db42](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/340db42b3a65f9e2997e337c0e9d4fb40b2d4305))
+* **build:** Rasterize favicons and emit PWA manifest at build time ([de6fa9f](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/de6fa9f133b35b88a2c93a0786dfe2be6476c9b9))
+* **build:** Source SITE_HOST from GitHub Pages REST API ([d410322](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/d41032210f053ec8f64a1081416fae711060dfec))
+* **footer:** Credit Weleda for logo and brand name ([56833d5](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/56833d589a3d46b43486b153056533558ae4709d))
+* **i18n:** Hot-reload translations on de.yml edit ([716c533](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/716c533ebfb00bc7d707fd1499123ac201cc6b37))
+* **styles:** Apply theme crossfade system ([ee08b6b](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/ee08b6bffb725971ba8ae06f4cec0a874a99674b))
+* **styles:** Tailwind v4 [@theme](https://github.com/theme) bridge, custom variants, container utility ([12e5a16](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/12e5a16c87ae2a61a27039c92221f0ebb3674dd8))
+* **theme:** Synchronize browser chrome color with app theme ([f87eba1](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/f87eba153238f31415faa714aa3c3113feb8b266))
+* **ui:** Sticky blurred header with translucent --header-bg token ([9318379](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/9318379a59da76e1a97c471f6c67a03b32ecc052))
+
+
+### 🐛 Bug Fixes
+
+* **build:** Serve site.webmanifest from vite dev server ([669533b](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/669533b51b78fed70f87bd223f2fdc42982493e2))
+* **ui:** Page scroll bar should be white in light mode ([bbabb8f](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/bbabb8f67ff2386722754ba2efd9805b87688435))
+* **workflows:** Use GH_PAT for Dependabot auto-merge to fire downstream workflows ([b698f57](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/b698f572e5c7541fac98ce741c1da87924f48a1e))
+
+
+### ⚡ Performance
+
+* **theme:** Apply theme and JS classes on &lt;html&gt; to prevent FOUC ([6faafd9](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/6faafd9d6e086f3c7078d6e6a9318d56abc5523f))
+
+
+### ♻️ Refactoring
+
+* **plugins:** Rename static-artifacts to spa-fallback ([330d33d](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/330d33d1f001a4eac5880fbd4e6eb75623bbe682))
+* **scripts:** Relocate pnpm hash bump script ([8f7af2a](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/8f7af2a6253b93a4cac59807b3dc355d2b07ccb7))
+* **styles:** Split main.scss into partials; migrate components to Tailwind ([2560a9e](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/2560a9e07e879a655b4f5b4003b5d2f8be1e03ee))
+* **theme:** Use useSyncExternalStore for shared theme state ([c425df0](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/c425df0ef97fab49d72170b1cd11d1a952a664c1))
+
+
+### 📚 Documentation
+
+* **agents:** Document Tailwind migration, theme system, build pipeline ([936ab33](https://github.com/D3strukt0r/weleda-webcenter-text-export/commit/936ab331c1d304445695898f550cfee7302f7f37))
+
 ## [3.0.1](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/3.0.0...3.0.1) (2026-05-16)
 
 
