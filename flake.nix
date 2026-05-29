@@ -45,7 +45,7 @@
             pnpmDeps = pkgs.pnpm_10.fetchDeps {
               inherit (finalAttrs) pname version src;
               fetcherVersion = 2;
-              hash = "sha256-17ew8CrIsRjw1wCG0v950YXRHrSA3WSawoxYGteaJeU=";
+              hash = "sha256-0Ju9/R2mgEhsB37G61SSVok0BZ4RsFmD0Q55snOpzSA=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
