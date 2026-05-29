@@ -18,23 +18,23 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@react-router/node": "^7.15.1",
-    "@react-router/serve": "^7.15.1",
+    "@react-router/node": "^7.16.0",
+    "@react-router/serve": "^7.16.0",
     "classnames": "^2.5.1",
     "fast-xml-parser": "^5.8.0",
-    "i18next": "^26.2.0",
+    "i18next": "^26.3.0",
     "i18next-browser-languagedetector": "^8.2.1",
     "isbot": "^5.1.40",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-i18next": "^17.0.8",
-    "react-router": "^7.15.1"
+    "react-router": "^7.16.0"
   },
   "devDependencies": {
     "@iwf-web/eslint-coding-standard": "^1.1.0",
     "@iwf-web/tsconfig": "^1.1.0",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
-    "@react-router/dev": "^7.15.1",
+    "@react-router/dev": "^7.16.0",
     "@tailwindcss/vite": "^4.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
