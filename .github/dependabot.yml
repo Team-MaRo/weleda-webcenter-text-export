@@ -24,7 +24,7 @@ updates:
     labels:
       - "dependabot :robot:"
     schedule:
-      interval: weekly # on monday
+      interval: weekly
       day: monday # TODO: remove when dependabot learned to default to monday and not to friday
       time: '09:30'
       timezone: Europe/Zurich

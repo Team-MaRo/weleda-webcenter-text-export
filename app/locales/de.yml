@@ -4,6 +4,8 @@ meta:
 
 brand:
   name: 'WebCenter Konverter'
+  short_name: 'WC Konverter'
+  description: 'XML in lesbaren Text verwandeln. Lokale Verarbeitung im Browser.'
   weleda_alt: 'Weleda'
   tagline: 'Web Center XML → Text Konverter'
 
