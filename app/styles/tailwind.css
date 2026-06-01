@@ -8,15 +8,17 @@
   --font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Lora', Georgia, serif;
 
-  /* Project radius — Tailwind's default scale skips 14px / 10px. */
-  --radius-card: 14px;
-  --radius-pill: 10px;
+  /* Default transition duration → 200ms, so shadcn's `transition-colors`
+     (and any bare `transition`) match the theme-flip cadence without an
+     explicit `duration-*`. Hover/focus therefore animate at 200ms too. */
+  --default-transition-duration: 200ms;
 
-  /* OKLCH shadows already declared as runtime CSS vars in _tokens.scss
-     (light + dark variants). Alias them to Tailwind shadow tokens so
-     `shadow-card-sm` / `shadow-card-md` flip with the theme cascade. */
-  --shadow-card-sm: var(--shadow-sm);
-  --shadow-card-md: var(--shadow-md);
+  /* Radius ladder. `--radius` is the runtime token (0.75rem, set in
+     _tokens.scss); the ladder derives lg/md/sm so shadcn `rounded-lg`
+     (`var(--radius)`) etc. resolve. */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 
   /* Soft easing curve for transitions that should feel deliberate
      (drop zone hover, result panel reveal). */
@@ -35,31 +37,45 @@
   --container-prose-narrow: 56ch;
 }
 
-/* Color tokens — declared in a separate `@theme inline` so Tailwind inlines
-   the var() reference directly into utilities (e.g. `.text-ink { color:
-   var(--ink); }`) instead of going through a `--color-ink: var(--ink)`
-   alias. The alias chain interferes with theme transition: consumers can
-   see a stale value during the animation in some browsers. Inlining hands
-   them the runtime variable directly. */
+/* Color tokens — declared in `@theme inline` so Tailwind inlines the var()
+   reference directly into utilities (e.g. `.text-foreground { color:
+   var(--foreground); }`) instead of going through a `--color-foreground:
+   var(--foreground)` alias. The alias chain interferes with theme transition:
+   consumers can see a stale value during the animation in some browsers.
+   Inlining hands them the runtime variable directly — and it's mandatory for
+   the `/alpha` color-mix path (`bg-primary/90`) and the 200ms flip. */
 @theme inline {
-  --color-bg:           var(--bg);
-  --color-bg-soft:      var(--bg-soft);
-  --color-paper:        var(--paper);
-  --color-paper-hover:  var(--paper-hover);
-  --color-ink:          var(--ink);
-  --color-ink-soft:     var(--ink-soft);
-  --color-ink-mute:     var(--ink-mute);
-  --color-line:         var(--line);
-  --color-line-soft:    var(--line-soft);
-  --color-accent:       var(--accent);
-  --color-accent-d:     var(--accent-d);
-  --color-accent-s:     var(--accent-s);
-  --color-accent-fg:    var(--accent-fg);
-  --color-accent-glow:  var(--accent-glow);
-  --color-warn:         var(--warn);
-  --color-toast-bg:     var(--toast-bg);
-  --color-toast-fg:     var(--toast-fg);
-  --color-header:       var(--header-bg);
+  /* shadcn-named colour tokens. Each maps a Tailwind utility name onto a
+     runtime CSS variable from _tokens.scss, so `bg-background`,
+     `text-foreground`, `bg-primary/90` (→ color-mix), etc. resolve and
+     re-theme with the light/dark cascade. */
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+
+  /* App-specific extras (brand pill colour + glass header surface). */
+  --color-sage:                 var(--sage);
+  --color-sage-foreground:      var(--sage-foreground);
+  --color-sage-hover:           var(--sage-hover);
+  --color-header:               var(--header-bg);
+
+  /* Output reading font size → `text-read` utility. */
+  --text-read: var(--read-size);
 }
 
 /* Duration alias — declared as explicit `@utility` rather than via
@@ -85,15 +101,16 @@
    hide UI that has no meaningful no-JS state (theme toggle, etc). */
 @custom-variant no-js (&:where(html:not(.js), html:not(.js) *));
 
-/* Custom container caps. Stepped to project breakpoints; tops out at
-   ~980px on `lg` (the prior brand width) and never grows beyond. Each
-   cap sits 1rem below its breakpoint so the container hits its max-width
-   immediately at every breakpoint and doesn't drift as the viewport
-   widens past the breakpoint by the scrollbar's width. */
+/* Custom container caps. Stepped to project breakpoints and retuned to the
+   redesign widths (720 / 900 / 1000). Each cap sits 1rem below its breakpoint
+   so the container hits its max-width immediately at every breakpoint and
+   doesn't drift as the viewport widens past the breakpoint by the scrollbar's
+   width (scrollbar-aware snapping). Tops out at 1000px on `xl` and never
+   grows beyond. */
 @utility container {
   width: 100%;
   margin-inline: auto;
-  @media (min-width: 40rem) { max-width: 39rem; }     /* sm  640 → 624 */
-  @media (min-width: 48rem) { max-width: 47rem; }     /* md  768 → 752 */
-  @media (min-width: 64rem) { max-width: 61.25rem; }  /* lg 1024 → 980 (cap) */
+  @media (min-width: 48rem) { max-width: 45rem; }     /* md   768 → 720 */
+  @media (min-width: 64rem) { max-width: 56.25rem; }  /* lg  1024 → 900 */
+  @media (min-width: 80rem) { max-width: 62.5rem; }   /* xl  1280 → 1000 (cap) */
 }

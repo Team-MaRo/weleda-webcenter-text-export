@@ -15,7 +15,7 @@
   display: none;
   margin: 0;
   font-size: 13px;
-  color: var(--accent-d);
+  color: var(--primary);
 }
 
 .dropzone-form:has(input[type='file']:valid) .no-js-selected-hint {
@@ -26,33 +26,29 @@
   opacity: 0.55;
 }
 
+// ─── Result file stats (· separated, themed) ─────────────────────────────
 .file-stats {
-  font-size: 12.5px;
-  color: var(--ink-mute);
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  font-size: 12px;
+  color: var(--muted-foreground);
   transition: color var(--theme-transition) ease;
 
-  span::before {
+  span:not(:first-child)::before {
     content: '·';
-    margin-right: 10px;
-    color: var(--line);
+    margin-right: 12px;
+    color: var(--border);
     transition: color var(--theme-transition) ease;
-  }
-
-  span:first-child::before {
-    display: none;
   }
 }
 
 // ─── Result panel ────────────────────────────────────────────────────────
-// The Result `<article>` uses Tailwind's `transition-[opacity,transform]
-// duration-[250ms]` for its reveal animation, which sets the whole
-// transition shorthand and drops `background-color` / `border-color` from
-// the property list. With the themed `bg-paper` + `border-line-soft`
-// classes on the article, those properties would snap on theme flip.
-// Declare the full transition explicitly here, with per-property durations:
-// opacity/transform at the 250ms reveal speed, bg/border at theme-transition.
+// The Result `<article>` uses Tailwind's `transition` for its reveal
+// (opacity/translate). Declaring the full transition explicitly here pins
+// per-property durations: opacity/transform at the reveal speed, bg/border
+// at theme-transition — so a theme flip while the panel is showing animates
+// the surface colours instead of snapping them.
 .result-panel {
   transition:
     opacity          250ms                  ease,
@@ -61,19 +57,48 @@
     border-color     var(--theme-transition) ease;
 }
 
-// ─── Output ──────────────────────────────────────────────────────────────
+// ─── Output scrollbar (thin, themed) ─────────────────────────────────────
+// Recreates the prototype's custom scrollbar with the OKLCH tokens. Firefox
+// uses `scrollbar-*`; WebKit/Blink uses the pseudo-elements.
+.output-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+    border: 3px solid transparent;
+  }
+}
+
+// ─── Output prose (.reading look — Lora serif) ───────────────────────────
 .output {
-  padding: 28px 32px 36px;
-  font-family: 'Lora', Georgia, serif;
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--ink);
-  max-height: 70vh;
+  max-height: 60vh;
   overflow-y: auto;
+  padding: 28px 28px 28px;
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--read-size);
+  line-height: 1.8;
+  color: var(--foreground);
   transition: color var(--theme-transition) ease;
 
+  @media (min-width: 640px) {
+    padding-inline: 28px;
+  }
+
   p {
-    margin: 0 0 0.9em;
+    margin: 0 0 0.95em;
     // Honour soft line breaks emitted by xmlToText (e.g. from <br/>).
     white-space: pre-line;
 
@@ -83,19 +108,12 @@
   }
 
   mark {
-    background: var(--accent-s);
-    color: var(--accent-d);
+    background: var(--sage);
+    color: var(--sage-foreground);
     padding: 0 2px;
-    border-radius: 2px;
+    border-radius: 3px;
     transition:
       color            var(--theme-transition) ease,
       background-color var(--theme-transition) ease;
-  }
-}
-
-// ─── Responsive (overrides for classes not yet migrated to utilities) ───
-@media (max-width: 640px) {
-  .output {
-    padding: 22px 22px 28px;
   }
 }

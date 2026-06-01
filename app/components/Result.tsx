@@ -1,6 +1,5 @@
 import type {ChangeEvent, ReactNode} from 'react';
 import type {Segment} from '~/lib/xml-to-text/convert';
-import classNames from 'classnames';
 import {useDeferredValue, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import CheckIcon from '~/assets/icons/check.svg?react';
@@ -9,8 +8,10 @@ import CopyIcon from '~/assets/icons/copy.svg?react';
 import DownloadIcon from '~/assets/icons/download.svg?react';
 import FileIcon from '~/assets/icons/file.svg?react';
 import SearchIcon from '~/assets/icons/search.svg?react';
-import {Button} from '~/components/Button';
+import {Button} from '~/components/ui/button';
+import {Input} from '~/components/ui/input';
 import {escapeRegex, formatNumber, formatSize} from '~/lib/format';
+import {cn} from '~/lib/utils';
 
 interface Props {
   paragraphs: Segment[][];
@@ -173,21 +174,21 @@ export function Result({
 
   return (
     <article
-      className={classNames(
-        'result-panel mt-10 bg-paper border border-line-soft rounded-card shadow-card-sm overflow-hidden',
+      className={cn(
+        'result-panel mt-9 overflow-hidden rounded-2xl border border-border bg-card',
         visible
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 translate-y-2 pointer-events-none',
       )}
       aria-live="polite"
     >
-      <header className="flex items-center justify-between px-5 py-4 border-b border-line-soft gap-4 flex-wrap">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-accent-s text-accent-d grid place-items-center shrink-0" aria-hidden="true">
-            <FileIcon width={16} height={16} />
-          </div>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground" aria-hidden="true">
+            <FileIcon width={18} height={18} />
+          </span>
           <div className="min-w-0">
-            <div className="text-sm font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis max-w-sm max-md:max-w-44">
+            <div className="max-w-[180px] truncate text-sm font-medium sm:max-w-[300px]">
               {fileName || t('result.empty_dash')}
             </div>
             <div className="file-stats">
@@ -197,39 +198,41 @@ export function Result({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 no-js:hidden">
-          <Button copied={copied} type="button" onClick={handleCopy}>
+        <div className="flex items-center gap-2 no-js:hidden">
+          <Button variant="sage" size="default" className="rounded-lg" type="button" onClick={handleCopy}>
             {copied
-              ? <CheckIcon width={14} height={14} />
-              : <CopyIcon width={14} height={14} />}
+              ? <CheckIcon width={16} height={16} />
+              : <CopyIcon width={16} height={16} />}
             <span>{copied ? t('actions.copied') : t('actions.copy')}</span>
           </Button>
-          <Button type="button" onClick={handleDownload}>
-            <DownloadIcon width={14} height={14} />
+          <Button variant="outline" size="default" className="rounded-lg" type="button" onClick={handleDownload}>
+            <DownloadIcon width={16} height={16} />
             <span>{t('actions.download')}</span>
           </Button>
           <Button
-            variant="icon"
+            variant="ghost"
+            size="icon"
+            className="rounded-lg text-muted-foreground hover:text-foreground"
             type="button"
             onClick={onClear}
             title={t('actions.reset')}
             aria-label={t('actions.reset')}
           >
-            <CloseIcon width={15} height={15} />
+            <CloseIcon width={16} height={16} />
           </Button>
         </div>
       </header>
 
-      <div className="border-t border-line-soft flex items-center gap-2.5 bg-bg text-sm text-ink-mute pl-5 pr-3.5 py-2.5 no-js:hidden">
-        <SearchIcon width={14} height={14} />
-        <input
-          className="appearance-none border-0 bg-transparent flex-1 text-sm text-ink py-1 outline-none min-w-0 placeholder:text-ink-mute"
+      <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-3 sm:px-5 no-js:hidden">
+        <SearchIcon width={16} height={16} className="shrink-0 text-muted-foreground" />
+        <Input
+          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
           type="search"
           placeholder={t('search.placeholder')}
           value={query}
           onChange={handleSearchChange}
         />
-        <span className="tabular-nums text-xs">
+        <span className="text-[12px] tabular-nums text-muted-foreground">
           {debounced.trim()
             ? matchCount > 0
               ? t('search.matches_other', {count: matchCount})
@@ -238,7 +241,7 @@ export function Result({
         </span>
       </div>
 
-      <div className="output">
+      <div className="output output-scroll">
         {renderedParagraphs.map((segments, paraIdx) => (
           // eslint-disable-next-line react/no-array-index-key -- paragraphs render in document order from the converter; index is the stable identity
           <p key={paraIdx}>

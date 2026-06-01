@@ -65,8 +65,9 @@ export default defineConfig({
       out: 'site.webmanifest',
       keys: {name: 'brand.name', short_name: 'brand.short_name', description: 'brand.description'},
       // Static knobs; colours are sRGB hex (precomputed from OKLCH — some
-      // Android launchers don't parse `oklch(...)`).
-      manifest: {lang: 'de', display: 'standalone', theme_color: '#86bd67', background_color: '#86bd67'},
+      // Android launchers don't parse `oklch(...)`). Matches the redesign's
+      // light `--background` (THEME_COLOR_LIGHT = oklch(98.1% 0.005 95.1deg)).
+      manifest: {lang: 'de', display: 'standalone', theme_color: '#faf9f5', background_color: '#faf9f5'},
       icons: WEB_MANIFEST_ICONS,
     }),
     // react-router's vite plugin clashes with vitest's environment setup, so

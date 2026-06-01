@@ -1,34 +1,53 @@
-// ─── Design tokens (oklch palette from konverter design handoff) ─────────
+// ─── Design tokens (shadcn-named OKLCH palette — konverter redesign) ──────
 // Light is default; the `dark` mixin flips the runtime variables under both
 // `html.dark` (JS path) and `prefers-color-scheme: dark` on unset html
-// (no-JS path). Component rules consume the variables only — never the raw
-// oklch literals.
+// (no-JS path). Component rules + Tailwind utilities consume the variables
+// only — never the raw oklch literals.
+//
+// Token names follow shadcn/ui so the vendored `app/components/ui/*`
+// primitives resolve out of the box. App-specific extras kept: `--sage*`
+// (the brand pill colour) and `--read-size` (output font size). `--popover*`
+// are mapped to `--card*` so shadcn primitives (Sonner) inherit the card
+// surface — we have no separate popover surface in this app.
 
 @use 'mixins' as *;
 
 :root {
-  --bg:           oklch(98.5% 1.25% 90deg);
-  --bg-soft:      oklch(96.5% 2% 90deg);
-  --paper:        oklch(99.5% 0.75% 90deg);
-  --paper-hover:  oklch(100% 0% 0deg);
-  --header-bg:    oklch(98.5% 1.25% 90deg / 0.7);
-  --ink:          oklch(22% 2.5% 180deg);
-  --ink-soft:     oklch(42% 2.5% 180deg);
-  --ink-mute:     oklch(62% 2% 180deg);
-  --line:         oklch(90% 2% 130deg);
-  --line-soft:    oklch(94% 1.5% 130deg);
-  --accent:       oklch(58% 32.5% 135deg);
-  --accent-d:     oklch(50% 32.5% 135deg);
-  --accent-s:     oklch(96% 10% 135deg);
-  --accent-fg:    oklch(100% 0% 0deg);
-  --accent-glow:  oklch(58% 32.5% 135deg / 0.06);
-  --warn:         oklch(62% 45% 35deg);
-  --toast-bg:     oklch(22% 2.5% 180deg);
-  --toast-fg:     oklch(99.5% 0.75% 90deg);
-  --shadow-sm:    0 1px 2px oklch(20% 5% 180deg / 0.04), 0 0 0 1px oklch(20% 5% 180deg / 0.04);
-  --shadow-md:    0 6px 24px -8px oklch(20% 5% 180deg / 0.10), 0 0 0 1px oklch(20% 5% 180deg / 0.05);
-  --radius:       14px;
-  --radius-sm:    10px;
+  --background:            oklch(98.1% 0.0050 95.1deg);
+  --foreground:            oklch(28.7% 0.0256 167.7deg);
+  --card:                  oklch(99.4% 0.0018 95.1deg);
+  --card-foreground:       oklch(28.7% 0.0256 167.7deg);
+  // No dedicated popover surface — alias to card so shadcn primitives resolve.
+  --popover:               oklch(99.4% 0.0018 95.1deg);
+  --popover-foreground:    oklch(28.7% 0.0256 167.7deg);
+  --primary:               oklch(51.0% 0.0967 153.4deg);
+  --primary-foreground:    oklch(100% 0 0deg);
+  --secondary:             oklch(92.9% 0.0205 146.3deg);
+  --secondary-foreground:  oklch(35.7% 0.0476 165.9deg);
+  --muted:                 oklch(95.3% 0.0066 106.5deg);
+  --muted-foreground:      oklch(54.2% 0.0230 169.4deg);
+  --accent:                oklch(92.9% 0.0205 146.3deg);
+  --accent-foreground:     oklch(35.7% 0.0476 165.9deg);
+  --destructive:           oklch(58.5% 0.1793 34.9deg);
+  --border:                oklch(90.0% 0.0124 128.6deg);
+  --input:                 oklch(88.5% 0.0142 128.6deg);
+  --ring:                  oklch(51.0% 0.0967 153.4deg);
+
+  // App-specific brand pill colour (the sage chips / sage buttons). Kept
+  // outside the shadcn set so it survives a future `shadcn diff`.
+  --sage:                  oklch(84.4% 0.0459 146.1deg);
+  --sage-foreground:       oklch(33.4% 0.0437 166deg);
+  --sage-hover:            oklch(79.4% 0.0612 145.8deg);
+
+  // Output reading font size, tunable at runtime by the host iframe protocol
+  // (and exposed as the `text-read` Tailwind utility).
+  --read-size:             16px;
+
+  // Glassy translucent header surface (baked-in alpha — never on a core
+  // shadcn name so `bg-card/N` alpha utilities stay clean). 85% card opacity.
+  --header-bg:             oklch(98.1% 0.0050 95.1deg / 0.85);
+
+  --radius:                0.75rem;
 
   // Theme crossfade duration. Tunable here — all theme-related transitions
   // route through this variable. Tested correct at any value (200ms, 4s,
@@ -41,26 +60,30 @@
 // Dark cascade — covers both `html.dark` (JS path) and the no-JS fallback
 // `@media (prefers-color-scheme: dark)` on unset html. See `_mixins.scss`.
 @include dark {
-  --bg:           oklch(18% 3% 200deg);
-  --bg-soft:      oklch(22% 3% 200deg);
-  --paper:        oklch(24% 3.25% 200deg);
-  --paper-hover:  oklch(28% 3.5% 200deg);
-  --header-bg:    oklch(18% 3% 200deg / 0.75);
-  --ink:          oklch(96% 1.25% 90deg);
-  --ink-soft:     oklch(78% 2% 90deg);
-  --ink-mute:     oklch(60% 2.5% 90deg);
-  --line:         oklch(34% 3% 200deg);
-  --line-soft:    oklch(30% 3% 200deg);
-  --accent:       oklch(74% 32.5% 135deg);
-  --accent-d:     oklch(82% 32.5% 135deg);
-  --accent-s:     oklch(32% 15% 135deg);
-  --accent-fg:    oklch(18% 3% 200deg);
-  --accent-glow:  oklch(74% 32.5% 135deg / 0.10);
-  --warn:         oklch(72% 45% 35deg);
-  --toast-bg:     oklch(96% 1.25% 90deg);
-  --toast-fg:     oklch(18% 3% 200deg);
-  --shadow-sm:    0 1px 2px oklch(0% 0% 0deg / 0.30), 0 0 0 1px oklch(0% 0% 0deg / 0.25);
-  --shadow-md:    0 8px 28px -8px oklch(0% 0% 0deg / 0.55), 0 0 0 1px oklch(0% 0% 0deg / 0.30);
+  --background:            oklch(23.6% 0.0155 168.6deg);
+  --foreground:            oklch(94.1% 0.0117 99.5deg);
+  --card:                  oklch(26.9% 0.0169 168.7deg);
+  --card-foreground:       oklch(94.1% 0.0117 99.5deg);
+  --popover:               oklch(26.9% 0.0169 168.7deg);
+  --popover-foreground:    oklch(94.1% 0.0117 99.5deg);
+  --primary:               oklch(75.6% 0.0947 148.0deg);
+  --primary-foreground:    oklch(22.9% 0.0205 167.7deg);
+  --secondary:             oklch(33.4% 0.0213 168.7deg);
+  --secondary-foreground:  oklch(84.5% 0.0497 146deg);
+  --muted:                 oklch(32.2% 0.0176 169deg);
+  --muted-foreground:      oklch(73.5% 0.0225 99.8deg);
+  --accent:                oklch(33.4% 0.0213 168.7deg);
+  --accent-foreground:     oklch(84.5% 0.0497 146deg);
+  --destructive:           oklch(63.7% 0.1514 35.2deg);
+  --border:                oklch(37.4% 0.0214 168.9deg);
+  --input:                 oklch(39.4% 0.0229 168.8deg);
+  --ring:                  oklch(72.9% 0.1053 147.7deg);
+
+  --sage:                  oklch(75.1% 0.0546 145.9deg);
+  --sage-foreground:       oklch(25.7% 0.0281 166.9deg);
+  --sage-hover:            oklch(70.5% 0.0649 145.7deg);
+
+  --header-bg:             oklch(23.6% 0.0155 168.6deg / 0.85);
 
   color-scheme: dark;
 }

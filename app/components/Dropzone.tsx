@@ -2,7 +2,7 @@ import type {ChangeEvent, KeyboardEvent} from 'react';
 import {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import UploadIcon from '~/assets/icons/upload.svg?react';
-import {Button} from '~/components/Button';
+import {Button} from '~/components/ui/button';
 
 interface Props {
   onFileChosen: (file: File) => void;
@@ -37,26 +37,26 @@ export function Dropzone({onFileChosen}: Props) {
     // ambiguous between root layout and index route; the query picks index.
     <form method="post" action="?index" encType="multipart/form-data" className="dropzone-form">
       <label
-        className="group block relative bg-paper border-[1.5px] border-dashed border-line rounded-card px-8 py-13 text-center cursor-pointer transition-[border-color,background-color,transform] duration-theme ease-soft hover:border-accent hover:bg-accent-s focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+        className="group block cursor-pointer rounded-2xl border-2 border-dashed border-border bg-card/60 px-6 py-14 text-center transition-colors hover:border-sage hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         htmlFor="file-input"
         tabIndex={0}
         role="button"
         aria-label={t('dropzone.aria_label')}
         onKeyDown={handleKey}
       >
-        <div
-          className="size-14 mx-auto mb-4 rounded-full bg-bg-soft grid place-items-center text-ink-soft transition-[background-color,border-color,color] duration-theme ease-soft group-hover:bg-paper-hover group-hover:text-accent-d"
+        <span
+          className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-sage text-sage-foreground transition-colors group-hover:bg-sage-hover"
           aria-hidden="true"
         >
-          <UploadIcon width={22} height={22} strokeWidth={1.6} />
-        </div>
-        <p className="text-base font-medium text-ink m-0 mb-1">{t('dropzone.title')}</p>
-        <p className="text-sm text-ink-mute m-0">
-          {t('dropzone.subtitle_prefix')}{' '}
-          <span className="inline-block px-1.5 py-px rounded-full bg-bg-soft text-ink-soft text-xs ml-1.5 tracking-wide font-medium">
+          <UploadIcon width={28} height={28} strokeWidth={1.6} />
+        </span>
+        <span className="block text-base font-medium sm:text-lg">{t('dropzone.title')}</span>
+        <span className="mt-1.5 block text-sm text-muted-foreground">
+          {t('dropzone.subtitle_prefix')}
+          <span className="ml-1.5 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground">
             {t('dropzone.subtitle_pill')}
           </span>
-        </p>
+        </span>
         <input
           ref={inputRef}
           className="hidden"
@@ -68,7 +68,7 @@ export function Dropzone({onFileChosen}: Props) {
           onChange={handleChange}
         />
       </label>
-      <p className="mt-5 text-center text-ink-mute text-xs leading-relaxed [&_kbd]:font-sans [&_kbd]:text-xs [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:border [&_kbd]:border-line [&_kbd]:border-b-2 [&_kbd]:rounded-md [&_kbd]:bg-paper [&_kbd]:text-ink-soft">
+      <p className="mt-4 text-center text-[12.5px] text-muted-foreground [&_kbd]:rounded-md [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-border [&_kbd]:bg-card [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[11px] [&_kbd]:font-medium [&_kbd]:text-foreground">
         {t('dropzone.paste_hint_prefix')}{' '}
         <kbd>{t('dropzone.paste_hint_cmd')}</kbd>{t('dropzone.paste_hint_or')}<kbd>{t('dropzone.paste_hint_ctrl')}</kbd>
         {' + '}
@@ -80,7 +80,7 @@ export function Dropzone({onFileChosen}: Props) {
           <p className="no-js-selected-hint">
             <span aria-hidden="true">✓</span> {t('no_js.file_selected')}
           </p>
-          <Button variant="primary" type="submit">{t('no_js.submit')}</Button>
+          <Button variant="sage" type="submit">{t('no_js.submit')}</Button>
         </div>
       </noscript>
     </form>
