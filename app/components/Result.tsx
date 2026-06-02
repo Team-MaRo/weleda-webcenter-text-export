@@ -194,7 +194,7 @@ export function Result({
             <FileIcon width={18} height={18} />
           </span>
           <div className="min-w-0">
-            <div className="max-w-[180px] truncate text-sm font-medium sm:max-w-[300px]">
+            <div className="max-w-45 truncate text-sm font-medium sm:max-w-75">
               {fileName || t('result.empty_dash')}
             </div>
             <div className="file-stats">
@@ -238,7 +238,7 @@ export function Result({
           value={query}
           onChange={handleSearchChange}
         />
-        <span className="text-[12px] tabular-nums text-muted-foreground">
+        <span className="text-xs tabular-nums text-muted-foreground">
           {debounced.trim()
             ? matchCount > 0
               ? t('search.matches_other', {count: matchCount})

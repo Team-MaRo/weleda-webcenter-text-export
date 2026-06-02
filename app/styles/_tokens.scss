@@ -41,7 +41,7 @@
 
   // Output reading font size, tunable at runtime by the host iframe protocol
   // (and exposed as the `text-read` Tailwind utility).
-  --read-size:             16px;
+  --read-size:             1rem;
 
   // Glassy translucent header surface (baked-in alpha — never on a core
   // shadcn name so `bg-card/N` alpha utilities stay clean). 85% card opacity.

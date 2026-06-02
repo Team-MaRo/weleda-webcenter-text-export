@@ -53,7 +53,7 @@ export function Dropzone({onFileChosen}: Props) {
         <span className="block text-base font-medium sm:text-lg">{t('dropzone.title')}</span>
         <span className="mt-1.5 block text-sm text-muted-foreground">
           {t('dropzone.subtitle_prefix')}
-          <span className="ml-1.5 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground">
+          <span className="ml-1.5 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium tracking-wide text-muted-foreground">
             {t('dropzone.subtitle_pill')}
           </span>
         </span>
@@ -68,7 +68,7 @@ export function Dropzone({onFileChosen}: Props) {
           onChange={handleChange}
         />
       </label>
-      <p className="mt-4 text-center text-[12.5px] text-muted-foreground [&_kbd]:rounded-md [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-border [&_kbd]:bg-card [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[11px] [&_kbd]:font-medium [&_kbd]:text-foreground">
+      <p className="mt-4 text-center text-xs text-muted-foreground [&_kbd]:rounded-md [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-border [&_kbd]:bg-card [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-xs [&_kbd]:font-medium [&_kbd]:text-foreground">
         {t('dropzone.paste_hint_prefix')}{' '}
         <kbd>{t('dropzone.paste_hint_cmd')}</kbd>{t('dropzone.paste_hint_or')}<kbd>{t('dropzone.paste_hint_ctrl')}</kbd>
         {' + '}
