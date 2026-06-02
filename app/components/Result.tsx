@@ -172,6 +172,12 @@ export function Result({
     return {renderedParagraphs: out, matchCount: total};
   }, [paragraphs, debounced]);
 
+  const fileStats = [
+    {key: 'size', label: fileSize > 0 ? formatSize(fileSize) : t('result.size_initial')},
+    {key: 'words', label: `${formatNumber(words, lang)} ${t('result.words_suffix')}`},
+    {key: 'chars', label: `${formatNumber(chars, lang)} ${t('result.chars_suffix')}`},
+  ];
+
   return (
     <article
       className={cn(
@@ -192,9 +198,9 @@ export function Result({
               {fileName || t('result.empty_dash')}
             </div>
             <div className="file-stats">
-              <span>{fileSize > 0 ? formatSize(fileSize) : t('result.size_initial')}</span>
-              <span>{formatNumber(words, lang)} {t('result.words_suffix')}</span>
-              <span>{formatNumber(chars, lang)} {t('result.chars_suffix')}</span>
+              {fileStats.map((stat) => (
+                <span key={stat.key}>{stat.label}</span>
+              ))}
             </div>
           </div>
         </div>
@@ -226,7 +232,7 @@ export function Result({
       <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-4 py-3 sm:px-5 no-js:hidden">
         <SearchIcon width={16} height={16} className="shrink-0 text-muted-foreground" />
         <Input
-          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
           type="search"
           placeholder={t('search.placeholder')}
           value={query}
