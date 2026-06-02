@@ -27,8 +27,8 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "isbot": "^5.1.40",
     "radix-ui": "^1.4.3",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-i18next": "^17.0.8",
     "react-router": "^7.16.0",
     "robotstxt-util": "^4.1.0",
@@ -48,10 +48,10 @@
     "@types/culori": "^4.0.1",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24.12.4",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "culori": "^4.0.2",
-    "eslint": "^10.4.0",
+    "eslint": "^10.4.1",
     "jiti": "^2.7.0",
     "jsdom": "^29.1.1",
     "lodash": "^4.18.1",
@@ -60,10 +60,10 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
-    "vite": "^8.0.14",
+    "vite": "^8.0.16",
     "vite-plugin-svgr": "^5.2.0",
-    "vitest": "^4.1.7",
+    "vitest": "^4.1.8",
     "yaml": "^2.9.0"
   },
-  "packageManager": "pnpm@11.2.2+sha512.36e6621fad506178936455e70247b8808ef4ec25797a9f437a93281a020484e2607f6a469a22e982987c3dbb8866e3071514ab10a4a1749e06edcd1ec118436f"
+  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485"
 }
