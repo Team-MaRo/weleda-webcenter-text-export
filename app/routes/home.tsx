@@ -2,17 +2,17 @@ import type {Route} from './+types/home';
 import {useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useActionData} from 'react-router';
+import {toast} from 'sonner';
 import {AppFooter} from '~/components/AppFooter';
 import {DragOverlay} from '~/components/DragOverlay';
 import {Dropzone} from '~/components/Dropzone';
 import {Lede} from '~/components/Lede';
 import {Result} from '~/components/Result';
-import {Toast} from '~/components/Toast';
 import {Topbar} from '~/components/Topbar';
+import {Toaster} from '~/components/ui/sonner';
 import {useConverter} from '~/hooks/useConverter';
 import {usePageDragDrop} from '~/hooks/usePageDragDrop';
 import {usePasteXml} from '~/hooks/usePasteXml';
-import {useToast} from '~/hooks/useToast';
 import {i18n} from '~/i18n';
 import {xmlToText} from '~/lib/xml-to-text/convert';
 
@@ -73,32 +73,31 @@ export default function Home() {
       }
     : undefined;
   const {state, stats, hasResult, loadFile, clear} = useConverter(initial);
-  const {toast, showToast} = useToast();
 
   const handleFile = useCallback(
     async (file: File) => {
       const result = await loadFile(file);
       if (!result.ok) {
-        showToast(result.reason === 'not-xml' ? t('toast.not_xml') : t('toast.read_failed'), 'error');
+        toast.error(result.reason === 'not-xml' ? t('toast.not_xml') : t('toast.read_failed'));
         return;
       }
       if (!result.nonEmpty) {
-        showToast(t('toast.no_content'), 'error');
+        toast.error(t('toast.no_content'));
       }
     },
-    [loadFile, showToast, t],
+    [loadFile, t],
   );
 
   const {active: dragActive} = usePageDragDrop(handleFile);
 
   const handleShortcutNotUsable = useCallback(() => {
-    showToast(t('toast.not_xml'), 'error');
-  }, [showToast, t]);
+    toast.error(t('toast.not_xml'));
+  }, [t]);
   usePasteXml(handleFile, t('paste.pasted_file_name'), handleShortcutNotUsable);
 
   const handleCopyFailed = useCallback(() => {
-    showToast(t('toast.copy_failed'), 'error');
-  }, [showToast, t]);
+    toast.error(t('toast.copy_failed'));
+  }, [t]);
 
   return (
     <>
@@ -107,7 +106,7 @@ export default function Home() {
         <Lede />
         <Dropzone onFileChosen={handleFile} />
         {actionData && 'error' in actionData && actionData.error && (
-          <p className="mt-4 px-3.5 py-2.5 bg-bg-soft border-l-4 border-accent-d rounded-md text-ink text-sm" role="alert">
+          <p className="mt-4 rounded-md border-l-4 border-primary bg-muted px-3.5 py-2.5 text-sm text-foreground" role="alert">
             {t(errorMessageKey(actionData.error))}
           </p>
         )}
@@ -128,7 +127,7 @@ export default function Home() {
       </main>
       <AppFooter />
       <DragOverlay active={dragActive} />
-      <Toast toast={toast} />
+      <Toaster position="bottom-center" />
     </>
   );
 }

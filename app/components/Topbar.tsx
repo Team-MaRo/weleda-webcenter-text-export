@@ -6,20 +6,18 @@ import {ThemeToggle} from './ThemeToggle';
 export function Topbar() {
   const {t} = useTranslation();
   return (
-    <header className="sticky top-0 z-30 bg-header backdrop-blur-md border-b border-line-soft">
-      <div className="container flex items-center justify-between py-5 px-8 max-md:px-5">
-        <div className="flex items-center gap-3.5">
-          <WeledaMark className="w-8 h-8 block text-ink" aria-hidden="true" />
-          <WeledaWordmark className="h-4 w-auto block text-ink" role="img" aria-label={t('brand.weleda_alt')} />
-          <span className="w-px h-5 bg-line mx-1" aria-hidden="true" />
-          <span className="text-xs text-ink-soft tracking-wide font-medium">{t('brand.tagline')}</span>
+    <header className="sticky top-0 z-30 border-b border-border bg-header backdrop-blur-md">
+      <div className="container flex h-16 items-center justify-between gap-4 px-8 max-md:px-5">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <WeledaMark className="h-6 w-6 shrink-0 object-contain text-foreground" aria-hidden="true" />
+          <WeledaWordmark className="h-3.5 w-auto shrink-0 text-foreground" role="img" aria-label={t('brand.weleda_alt')} />
+          <span className="mx-1 hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
+          <span className="hidden truncate text-xs font-medium tracking-wide text-muted-foreground sm:block">{t('brand.tagline')}</span>
         </div>
         <div className="flex items-center gap-3.5">
-          <span className="text-xs text-ink-mute tracking-wide max-md:hidden">
+          <span className="text-xs tracking-wide text-muted-foreground max-md:hidden [&_kbd]:rounded-md [&_kbd]:border [&_kbd]:border-b-2 [&_kbd]:border-border [&_kbd]:bg-card [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-xs [&_kbd]:font-medium [&_kbd]:text-foreground">
             {t('topbar.hint')}{' '}
-            <kbd className="font-sans text-xs font-medium px-1.5 py-0.5 border border-line border-b-2 rounded-md bg-paper text-ink-soft">
-              {t('topbar.hint_kbd')}
-            </kbd>
+            <kbd>{t('topbar.hint_kbd')}</kbd>
           </span>
           <ThemeToggle />
         </div>

@@ -10,9 +10,9 @@ body {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color: var(--ink);
-  background: var(--bg);
-  font-size: 15px;
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 0.9375rem;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -40,25 +40,27 @@ body {
 //    `bg-*` (e.g. Button's `bg-paper text-ink`) win the cascade and get
 //    all three property transitions.
 //
-// Themed Tailwind utility class names enumerated from the `--color-*`
-// aliases in `tailwind.css`. All webcenter colour tokens flip between
-// themes, so none are excluded.
+// Themed Tailwind utility class names enumerated from the shadcn `--color-*`
+// aliases in `tailwind.css` (plus the `--sage*` / `--header` extras). All
+// webcenter colour tokens flip between themes, so none are excluded.
 @layer base {
   :is(
-    .bg-bg, .bg-bg-soft, .bg-paper, .bg-paper-hover,
-    .bg-accent, .bg-accent-d, .bg-accent-s, .bg-accent-fg,
-    .bg-warn, .bg-toast-bg, .bg-header,
-    .border-line, .border-line-soft,
-    .border-ink, .border-ink-soft, .border-ink-mute,
-    .border-accent, .border-accent-d
+    .bg-background, .bg-card, .bg-popover,
+    .bg-primary, .bg-secondary, .bg-muted, .bg-accent,
+    .bg-destructive, .bg-foreground,
+    .bg-sage, .bg-sage-hover, .bg-header,
+    .border-border, .border-input,
+    .border-primary, .border-sage
   ) {
     transition:
       background-color var(--theme-transition) ease,
       border-color     var(--theme-transition) ease;
   }
-  .text-ink, .text-ink-soft, .text-ink-mute,
-  .text-accent, .text-accent-d, .text-accent-fg,
-  .text-warn, .text-toast-fg {
+  .text-foreground, .text-card-foreground, .text-popover-foreground,
+  .text-primary, .text-primary-foreground,
+  .text-secondary-foreground, .text-muted-foreground,
+  .text-accent-foreground, .text-sage-foreground,
+  .text-destructive, .text-background {
     transition:
       color            var(--theme-transition) ease,
       background-color var(--theme-transition) ease,
@@ -73,18 +75,21 @@ body {
   // reference the variable directly.) Bg/border on the same descendant
   // are property-independent, so they can use regular transitions.
   // Add a new pair of rules below for each combination found in the JSX.
-  [class*="[&_em]:text-accent-d"] em {
-    -webkit-text-fill-color: var(--accent-d);
+  //
+  // Hero h1's `<em class="text-primary">`: when emphasised via a descendant
+  // variant like `[&_em]:text-primary`, animate the fill-color, not `color`.
+  [class*="[&_em]:text-primary"] em {
+    -webkit-text-fill-color: var(--primary);
     transition: -webkit-text-fill-color var(--theme-transition) ease;
   }
-  // Dropzone's `<p class="… [&_kbd]:text-ink-soft [&_kbd]:bg-paper
-  // [&_kbd]:border-line">`: kbd descendants get all three themed properties
-  // via descendant variants and need a matching transition. Border-color
-  // and background-color are property-independent of the parent's `color`
+  // Dropzone tip's `<p class="… [&_kbd]:text-foreground [&_kbd]:bg-card
+  // [&_kbd]:border-border">`: kbd descendants get all three themed properties
+  // via descendant variants and need a matching transition. Border-color and
+  // background-color are property-independent of the parent's `color`
   // transition, so they animate normally; only `color` needs the fill-color
   // workaround.
-  [class*="[&_kbd]:text-ink-soft"] kbd {
-    -webkit-text-fill-color: var(--ink-soft);
+  [class*="[&_kbd]:text-foreground"] kbd {
+    -webkit-text-fill-color: var(--foreground);
     transition:
       -webkit-text-fill-color var(--theme-transition) ease,
       background-color        var(--theme-transition) ease,
@@ -107,18 +112,14 @@ body {
   }
 }
 
-// Reduced transparency: solid the accent glow + sticky header bg, and drop
-// all backdrop blur (drag overlay + header). Tokens that carry an alpha
-// channel (`--accent-glow`, `--header-bg`) get flipped to fully opaque
-// counterparts so nothing shows page content bleeding through underneath
-// once the blur is disabled.
+// Reduced transparency: solid the translucent sticky-header surface and any
+// `bg-*/N` alpha glass (drag overlay, header), and drop all backdrop blur.
+// The `--header-bg` token carries an alpha channel (0.85), so it gets flipped
+// to its fully opaque background counterpart per theme — nothing shows page
+// content bleeding through once the blur is disabled.
 @media (prefers-reduced-transparency: reduce) {
-  :root,
-  html.dark {
-    --accent-glow: transparent;
-  }
-  :root      { --header-bg: oklch(98.5% 1.25% 90deg); }
-  html.dark  { --header-bg: oklch(18% 3% 200deg); }
+  :root      { --header-bg: oklch(98.1% 0.0050 95.1deg); }
+  html.dark  { --header-bg: oklch(23.6% 0.0155 168.6deg); }
 
   // No-JS + OS dark: matches the no-JS dark fallback selector in
   // _tokens.scss (specificity 0,2,1) — without this rule, that
@@ -127,7 +128,7 @@ body {
   // Source order wins at equal specificity, so this flips it to opaque.
   @media (prefers-color-scheme: dark) {
     html:not(.light):not(.dark) {
-      --header-bg: oklch(18% 3% 200deg);
+      --header-bg: oklch(23.6% 0.0155 168.6deg);
     }
   }
 

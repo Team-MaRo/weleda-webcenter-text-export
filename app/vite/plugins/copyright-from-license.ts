@@ -34,8 +34,6 @@ const DEFAULT_CANDIDATES = [
 // and collapses them to a single first–last range for the footer, which is the
 // standard footer-copyright form — the comma+range form belongs in the LICENSE
 // file, the range form belongs in presentation.
-//
-// Designed as a one-file copy into other projects.
 export function copyrightFromLicense(opts: Options = {}): Plugin {
   return {
     name: 'copyright-from-license',

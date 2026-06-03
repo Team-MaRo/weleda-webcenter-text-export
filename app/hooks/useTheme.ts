@@ -4,9 +4,10 @@ const STORAGE_KEY = 'weleda-konverter:theme';
 
 // Shared by the JSX `<meta name="theme-color">` tags in root.tsx, the inline
 // bootstrap that runs them on first paint, and `applyTheme` below. Same values
-// as the `--bg` token in `_tokens.scss` (light line 5, dark line 29).
-export const THEME_COLOR_LIGHT = 'oklch(95.9% 1.7% 90deg)';
-export const THEME_COLOR_DARK = 'oklch(18% 3% 200deg)';
+// as the `--background` token in `_tokens.scss` (light `:root`, dark via the
+// `@include dark` mixin). Rendered sRGB: light `#faf9f5`, dark `#17211d`.
+export const THEME_COLOR_LIGHT = 'oklch(98.1% 0.0050 95.1deg)';
+export const THEME_COLOR_DARK = 'oklch(23.6% 0.0155 168.6deg)';
 
 export type Theme = 'light' | 'dark';
 

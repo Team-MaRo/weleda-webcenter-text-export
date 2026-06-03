@@ -99,9 +99,12 @@ Vagrant.configure('2') do |config|
 
         # An rsync watcher for Vagrant 1.5.1+ that uses fewer host resources at
         # the potential cost of more rsync actions.
+        # Configure the window for gatling to coalesce writes.
         if Vagrant.has_plugin?('vagrant-gatling-rsync')
             config.gatling.latency = 1.5
             config.gatling.time_format = '%H:%M:%S'
+
+            # Automatically sync when machines with rsync folders come up.
             config.gatling.rsync_on_startup = false
         end
     elsif settings.dig('folder', 'type') == 'smb'
@@ -224,6 +227,13 @@ Vagrant.configure('2') do |config|
         fi
     SCRIPT
 
+    # Increase file watcher limit for Vite.js
+    #config.vm.provision 'fix-file-watcher-limit', type: 'shell', privileged: false, inline: <<-SCRIPT
+    #    set -e -u -x -o pipefail
+    #    echo fs.inotify.max_user_watches=100000 | sudo tee -a /etc/sysctl.conf >/dev/null
+    #    sudo sysctl -p >/dev/null
+    #SCRIPT
+
     # Update Box and fix "dpkg-reconfigure: unable to re-open stdin: No file or directory"
     # See https://serverfault.com/a/717770/955565
     config.vm.provision 'prepare-and-fix-apt', type: 'shell', privileged: false, inline: <<-SCRIPT
@@ -232,6 +242,9 @@ Vagrant.configure('2') do |config|
         sudo dpkg-reconfigure debconf -f noninteractive -p critical
 
         sudo apt-get update -qq
+
+        # TODO: dist-upgrade locks the machine during bios update
+        #sudo apt-get dist-upgrade -qq >/dev/null
     SCRIPT
 
     # Fixes "fatal: detected dubious ownership in repository at '/vagrant'"
