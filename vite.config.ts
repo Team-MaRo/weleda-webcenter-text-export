@@ -1,5 +1,6 @@
 import {join} from 'node:path';
 import process from 'node:process';
+import {cloudflare} from '@cloudflare/vite-plugin';
 import ViteYaml from '@modyfi/vite-plugin-yaml';
 import {reactRouter} from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
@@ -22,6 +23,11 @@ const isVitest = process.env.VITEST === 'true';
 // SSR serves the SEO artifacts as runtime resource routes; only the SPA
 // (GitHub Pages) build emits them as static files (host known at build time).
 const isSpa = process.env.SSR === 'false';
+// Cloudflare Workers SSR target — opt-in via CLOUDFLARE=true (see build:cf /
+// dev:cf scripts; Cloudflare Workers Builds runs build:cf). The Node/Nix Docker
+// SSR + GitHub Pages SPA builds leave CLOUDFLARE unset, so the plugin stays out
+// of their pipelines.
+const isCloudflare = process.env.CLOUDFLARE === 'true';
 
 // Deployed hostname for the SPA build's static SEO files. CI's
 // deploy-gh-pages.yml passes it as SITE_HOST (from the Pages custom domain);
@@ -33,6 +39,13 @@ const SITE_URL = `https://${SITE_HOST}`;
 
 export default defineConfig({
   plugins: [
+    // Cloudflare Workers SSR adapter. Must run before reactRouter; gated to
+    // the CF target so the Node/Nix + SPA builds are untouched. Skipped under
+    // Vitest (clashes with the test environment setup, same as reactRouter).
+    ...(isCloudflare && !isVitest
+      ? [
+          cloudflare({viteEnvironment: {name: 'ssr'}})]
+      : []),
     tailwindcss(),
     // Must run before reactRouter so its scan sees the post-transform source
     // (with `action` removed in SPA mode).
