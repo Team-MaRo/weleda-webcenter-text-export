@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.2.0](https://github.com/Team-MaRo/weleda-webcenter-text-export/compare/3.1.0...3.2.0) (2026-06-03)
+
+
+### ✨ Features
+
+* add Cloudflare Workers SSR as a third deploy target ([b65b29b](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/b65b29b3830838a6b85bf39af34e4491fd292cde))
+* Dynamic SEO in SSR and build in SPA & favicon endpoints for Dev mode ([ee5e498](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/ee5e49818210743e5c9e1f4d23b95fd87904f804))
+* Rebuild new UI with schadcn ([135fa8b](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/135fa8b2a23c7379e414b0b9354c340c72b1a8fb))
+* Use standard tokens and rem instead of px ([8cba1d3](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/8cba1d3d3519921bcd7eb7dd2c559a4452f90390))
+
 ## [3.1.0](https://github.com/D3strukt0r/weleda-webcenter-text-export/compare/3.0.1...3.1.0) (2026-05-26)
 
 
