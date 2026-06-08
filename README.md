@@ -16,14 +16,14 @@ Four ways to load an XML:
 - **`<form>` POST** — picks the file in the dropzone and clicks the
   Hochladen button that only appears when JavaScript is disabled.
 
-[![License](https://img.shields.io/github/license/D3strukt0r/weleda-webcenter-text-export?label=License)](LICENSE.txt)
+[![License](https://img.shields.io/github/license/Team-MaRo/weleda-webcenter-text-export?label=License)](LICENSE.txt)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa)][code-of-conduct]
 [![Docker Stars](https://img.shields.io/docker/stars/d3strukt0r/weleda-webcenter-text-export)][docker]
 [![Docker Pulls](https://img.shields.io/docker/pulls/d3strukt0r/weleda-webcenter-text-export)][docker]
 
-[![CI](https://github.com/D3strukt0r/weleda-webcenter-text-export/actions/workflows/ci.yml/badge.svg)][gh-action]
-[![Pages](https://github.com/D3strukt0r/weleda-webcenter-text-export/actions/workflows/deploy-gh-pages.yml/badge.svg)][gh-action]
-[![Docker](https://github.com/D3strukt0r/weleda-webcenter-text-export/actions/workflows/docker.yml/badge.svg)][gh-action]
+[![CI](https://github.com/Team-MaRo/weleda-webcenter-text-export/actions/workflows/ci.yml/badge.svg)][gh-action]
+[![Pages](https://github.com/Team-MaRo/weleda-webcenter-text-export/actions/workflows/deploy-gh-pages.yml/badge.svg)][gh-action]
+[![Docker](https://github.com/Team-MaRo/weleda-webcenter-text-export/actions/workflows/docker.yml/badge.svg)][gh-action]
 
 ## Running the container
 
@@ -344,8 +344,8 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 This project currently uses no third-party libraries or copied code.
 
 [docker]: https://hub.docker.com/r/d3strukt0r/weleda-webcenter-text-export
-[gh-action]: https://github.com/D3strukt0r/weleda-webcenter-text-export/actions
-[gh-tags]: https://github.com/D3strukt0r/weleda-webcenter-text-export/tags
-[gh-contributors]: https://github.com/D3strukt0r/weleda-webcenter-text-export/contributors
-[contributing]: https://github.com/D3strukt0r/.github/blob/master/CONTRIBUTING.md
-[code-of-conduct]: https://github.com/D3strukt0r/.github/blob/master/CODE_OF_CONDUCT.md
+[gh-action]: https://github.com/Team-MaRo/weleda-webcenter-text-export/actions
+[gh-tags]: https://github.com/Team-MaRo/weleda-webcenter-text-export/tags
+[gh-contributors]: https://github.com/Team-MaRo/weleda-webcenter-text-export/contributors
+[contributing]: https://github.com/Team-MaRo/.github/blob/master/CONTRIBUTING.md
+[code-of-conduct]: https://github.com/Team-MaRo/.github/blob/master/CODE_OF_CONDUCT.md
