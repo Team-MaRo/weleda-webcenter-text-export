@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1](https://github.com/Team-MaRo/weleda-webcenter-text-export/compare/3.2.0...3.2.1) (2026-06-08)
+
+
+### 🐛 Bug Fixes
+
+* support GitHub Pages project sub-path deploys ([bb1b39f](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/bb1b39fe1407319e0b5720c99ae4af9d435b0506))
+* Update to new repo location & use new central Vagrantbox ([7d2509c](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/7d2509c4ef4382d3abb0d9291cfd1f9d14744bbe))
+
+
+### 📚 Documentation
+
+* Add note about keep a changelog ([7e13678](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/7e1367874b382a4bb339cb991b11487f5ea260be))
+
 ## [3.2.0](https://github.com/Team-MaRo/weleda-webcenter-text-export/compare/3.1.0...3.2.0) (2026-06-03)
 
 
