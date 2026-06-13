@@ -39,13 +39,15 @@
 
             nativeBuildInputs = [
               pkgs.nodejs-slim_24
-              pkgs.pnpm_10.configHook
+              pkgs.pnpm_10
+              pkgs.pnpmConfigHook
             ];
 
-            pnpmDeps = pkgs.pnpm_10.fetchDeps {
+            pnpmDeps = pkgs.fetchPnpmDeps {
               inherit (finalAttrs) pname version src;
-              fetcherVersion = 2;
-              hash = "sha256-TZszQKZkojrbkpBxlFI+e8rWZge2Ex/h1VxgL8fxApc=";
+              pnpm = pkgs.pnpm_10;
+              fetcherVersion = 3;
+              hash = "sha256-Wr9sse4VoLjC4AgGDyU/ImwRo1Iq1GiEV/HeVyqmtjM=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
@@ -94,7 +96,7 @@
 
           inherit (nix-utils.lib.oci) secondsToNanos createdFromDate;
 
-          fixHistoryScript = nix-utils.packages.${pkgs.system}.fixOciImageHistory;
+          fixHistoryScript = nix-utils.packages.${pkgs.stdenv.hostPlatform.system}.fixOciImageHistory;
 
           # Healthcheck only hits localhost over plain HTTP, so strip
           # everything but TLS. `curlMinimal` upstream still keeps gss + scp
