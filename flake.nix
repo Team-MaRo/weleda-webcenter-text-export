@@ -23,7 +23,7 @@
         default = pkgs.mkShell {
           packages = [
             pkgs.nodejs_24
-            pkgs.pnpm_10
+            pkgs.pnpm_11
             pkgs.curl
             pkgs.cacert
           ];
@@ -39,15 +39,15 @@
 
             nativeBuildInputs = [
               pkgs.nodejs-slim_24
-              pkgs.pnpm_10
+              pkgs.pnpm_11
               pkgs.pnpmConfigHook
             ];
 
             pnpmDeps = pkgs.fetchPnpmDeps {
               inherit (finalAttrs) pname version src;
-              pnpm = pkgs.pnpm_10;
+              pnpm = pkgs.pnpm_11;
               fetcherVersion = 3;
-              hash = "sha256-V4YSEM+RW8k67NwgwnX8Z058V52ywNDzaiefZ/aWAIU=";
+              hash = "sha256-MKv+ZKRnabh60N5h3Eira54tAgL3IWab+UoFkhL73zk=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
