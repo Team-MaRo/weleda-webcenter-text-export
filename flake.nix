@@ -47,7 +47,7 @@
               inherit (finalAttrs) pname version src;
               pnpm = pkgs.pnpm_12;
               fetcherVersion = 3;
-              hash = "sha256-NPnbIvqzuUkIcLYuITQmdrEvLRxZGeNfnH4URfcwacs=";
+              hash = "sha256-cnxFhOFuuxbALeAlvROSMUkAsxQSuNBhyJpRh9DqQlI=";
             };
 
             # Skip fixupPhase. patchShebangs / patchELF would rewrite every
