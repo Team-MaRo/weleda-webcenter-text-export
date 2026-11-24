@@ -69,4 +69,12 @@ jobs:
           fi
           git add flake.nix
           git commit -m "chore: bump pnpmDeps.hash"
-          git push origin "HEAD:${GITHUB_REF#refs/heads/}"
+          # Another push (a Dependabot merge) can land while Nix computes the hash;
+          # only this job writes pnpmDeps.hash, so rebasing onto it cannot conflict.
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          for attempt in 1 2 3; do
+            git pull --rebase origin "$BRANCH"
+            git push origin "HEAD:$BRANCH" && exit 0
+            sleep $((attempt * 5))
+          done
+          exit 1
