@@ -45,6 +45,8 @@ Compose files:
 
 The split also gates the **no-JS fallback path**: the server-side `action()` on the home route only exists in the SSR build. The SPA build still ships the `<noscript>` form markup, but a POST to GitHub Pages would 404 — accept that, it's consistent with the SPA-mode constraint.
 
+The same constraint is why **unknown paths get their 404 in `entry.server.tsx`**, not from a `loader` on `routes/not-found.tsx`: the SPA build allows no server loaders, so the server entry sets the status whenever the catch-all route matched (and it isn't the SPA prerender). Without it, every unknown path answered 200 — scanners probing `/.env` saw a hit.
+
 ### XML → text conversion (`app/lib/xml-to-text/convert.ts`)
 
 This is the only non-trivial logic in the app. Behaviour is locked down by `convert.test.ts` against `__fixtures__/sample.xml` + `expected.txt`. Four deliberate decisions:

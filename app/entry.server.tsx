@@ -13,6 +13,12 @@ export default async function handleRequest(
   let shellRendered = false;
   const userAgent = request.headers.get('user-agent');
 
+  // The catch-all route renders a page but no status, and the SPA build allows no
+  // server loader to set one, so the server answers 404 here.
+  if (!routerContext.isSpaMode && routerContext.staticHandlerContext.matches.at(-1)?.route.id === 'routes/not-found') {
+    responseStatusCode = 404;
+  }
+
   const body = await renderToReadableStream(
     <ServerRouter context={routerContext} url={request.url} />,
     {
