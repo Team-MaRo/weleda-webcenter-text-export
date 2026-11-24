@@ -224,7 +224,7 @@ jobs:
           for arch in $ARCH_LIST; do
             archive="artifacts/image-${arch}/image.tar"
             test -f "$archive" || { echo "missing $archive"; exit 1; }
-            skopeo copy --dest-tls-verify=false \
+            skopeo copy --format oci --dest-tls-verify=false \
               docker-archive:"$archive" \
               docker://localhost:5000/staging:${arch}
             d=$(skopeo inspect --tls-verify=false \
@@ -239,6 +239,11 @@ jobs:
       - name: Extract user-facing Docker metadata
         uses: docker/metadata-action@v6
         id: meta
+        env:
+          # `imagetools create` only writes annotations onto the index it creates
+          # (an OCI one, hence `--format oci` when staging above); the default
+          # `manifest:` level makes it refuse them.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ${{ vars.IMAGE_NAME }}
           # Tag scheme: every push gets the branch name; semver tags also get
