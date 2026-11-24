@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.4](https://github.com/Team-MaRo/weleda-webcenter-text-export/compare/3.2.3...3.2.4) (2026-11-24)
+
+
+### 🐛 Bug Fixes
+
+* answer 404 for unknown paths ([6f063da](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/6f063da79050cfbb5e94a5a9009bc6cdda0989c3))
+* build nix image with pnpm 11 and patch vulnerable deps ([f325327](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/f325327106e30159486fe1924f005563bf2e5e5f))
+* emit SPA 404.html via buildEnd hook; fix stale eslint-disable rule names ([5ecaaa1](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/5ecaaa1be4eaaf54a7d28c15932f0fb8b6aaa0f4))
+* update transitive deps to resolve pnpm audit advisories ([2b09051](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/2b09051048db14d5a3ce9b1249accfd9e96ec1fd))
+
+
+### 📚 Documentation
+
+* point the SPA 404.html fallback at react-router.config.ts ([b1a1e04](https://github.com/Team-MaRo/weleda-webcenter-text-export/commit/b1a1e049e3b2b90bff450552c9284e4110128411))
+
 ## [3.2.3](https://github.com/Team-MaRo/weleda-webcenter-text-export/compare/3.2.2...3.2.3) (2026-06-24)
 
 
